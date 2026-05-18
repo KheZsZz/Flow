@@ -26,9 +26,12 @@ export const OrderTypeSchema = z.enum([
   "Avarias",
 ]);
 
-export const blacklistedDomains = ['tempmail.com', 'mailinator.com', '10minutemail.com'];
-
+export const blacklistedDomains = [
+  "tempmail.com",
+  "mailinator.com",
+  "10minutemail.com",
+];
 
 export type OrderTypes = z.infer<typeof OrderTypeSchema>;
 export type VehicleTypes = z.infer<typeof VehicleTypeSchema>;
-export type UserTypes = z.infer<typeof UserTypeSchema>;
+export type UserProfileTypes = z.infer<typeof UserTypeSchema>;
