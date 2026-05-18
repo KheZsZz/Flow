@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "CommonJS",
+    "lib": ["ESNext"],
+
+    "ignoreDeprecations": "6.0",
+
+    "baseUrl": ".", 
+    "paths": {
+      "@/*": ["src/*"] 
+    },
+
+    "rootDir": "./src",
+    "outDir": "./dist",
+
+    "esModuleInterop": true,
+    "strict": true,
+    "skipLibCheck": true,
+    
+    "typeRoots": ["./node_modules/@types", "./src/types"]
+  },
+  "include": ["src/**/*", "src/types/express.d.ts"]
+}

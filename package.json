@@ -1,0 +1,40 @@
+{
+  "name": "flow",
+  "version": "1.0.0",
+  "description": "ERP logístico completo",
+  "main": "src/server.ts",
+  "scripts": {
+    "dev": "cross-env AMBIENT_PERFIL_ENV=development nodemon -r tsconfig-paths/register src/server.ts",
+    "production": "cross-env AMBIENT_PERFIL_ENV=production nodemon -r tsconfig-paths/register src/server.ts",
+    "build": "tsc",
+    "start": "node -r tsconfig-paths/register dist/server.js"
+  },
+  "keywords": [
+    "Flow Transportes",
+    "Flow",
+    "ERP",
+    "CRM",
+    "Logística"
+  ],
+  "author": "Kevin Oliveira",
+  "packageManager": "pnpm@10.33.2",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.8.0",
+    "cross-env": "^10.1.0",
+    "nodemon": "^3.1.14",
+    "supabase": "^2.98.2",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^6.0.3"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.95.3",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "zod": "^4.4.3"
+  }
+}
