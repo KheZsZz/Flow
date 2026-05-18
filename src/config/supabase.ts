@@ -2,9 +2,8 @@ import { createClient } from "@supabase/supabase-js";
 import dotenv from "dotenv";
 import path from "path";
 
-const envFile = process.env.AMBIENT_PERFIL_ENV === "production" 
-  ? ".env" 
-  : ".env.development";
+const envFile =
+  process.env.AMBIENT_PERFIL_ENV === "production" ? ".env" : ".env.development";
 
 dotenv.config({ path: path.resolve(process.cwd(), envFile) });
 
