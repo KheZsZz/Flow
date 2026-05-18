@@ -41,13 +41,13 @@ CREATE TABLE Address(
 -- Necessário ter um Manager Geral para criar os outros usuários e empresas
 CREATE TABLE Users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    date_of_birth DATE NOT NULL,
     document_user VARCHAR(14) NOT NULL UNIQUE,
     name_user VARCHAR(255) NOT NULL,
     email_user VARCHAR(255) NOT NULL UNIQUE,
     password_user VARCHAR(255) NOT NULL,
-    type_user UserType NOT NULL DEFAULT 'Commum',
-    avatar_url VARCHAR(255),
+    phone VARCHAR(20) NOT NULL,
+    profile UserType NOT NULL DEFAULT 'Commum',
+    avatar_url text default 'https://png.pngtree.com/png-clipart/20200224/original/pngtree-avatar-icon-profile-icon-member-login-vector-isolated-png-image_5247852.jpg',
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
 
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -212,5 +212,5 @@ CREATE TABLE Order_add_itens (
 CREATE TABLE Fuel (
     id uuid default gen_random_uuid() primary key,
     vehicle_id uuid references Vehicles(id) on delete cascade,
-    
+
 );
