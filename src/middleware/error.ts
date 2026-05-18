@@ -20,6 +20,7 @@ export const errorHandler = (
 
   // 405
   // 404
+  // 409
 
   if (err.status === 401 || err.message.includes("invalid claim")) {
     return res.status(401).json({

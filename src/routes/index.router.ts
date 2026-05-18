@@ -5,12 +5,33 @@ import corporateRoutes from "@/routes/corporateRoutes";
 import userRoutes from "@/routes/userRoutes";
 import vehicleRoutes from "@/routes/vehicleRoutes";
 import addressRoutes from "@/routes/addressRoutes";
+import statusRoutes from "@/routes/statusRoutes";
 
 export const router = Router();
 
 router.use("/address", addressRoutes);
-router.use(corporateRoutes);
-router.use(userRoutes, authMiddleware.authUser, authMiddleware.reqCompany);
-router.use(vehicleRoutes, authMiddleware.authUser, authMiddleware.reqCompany);
+
+router.use("/corporate", corporateRoutes);
+
+router.use(
+  "/user",
+  userRoutes,
+  authMiddleware.authUser,
+  authMiddleware.reqCompany,
+);
+router.use(
+  "/vehicle",
+  vehicleRoutes,
+  authMiddleware.authUser,
+  authMiddleware.reqCompany,
+);
+
+router.use(
+  "/status",
+  authMiddleware.authUser,
+  authMiddleware.reqCompany,
+  authMiddleware.isAdmin,
+  statusRoutes,
+);
 
 export default router;

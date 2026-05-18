@@ -143,6 +143,7 @@ CREATE TABLE Status (
     code VARCHAR(255) NOT NULL,
     name VARCHAR(255) NOT NULL,
     description VARCHAR(255) NOT NULL,
+    corporation_id UUID NOT NULL REFERENCES Corporation(id) ON DELETE CASCADE,
 
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
