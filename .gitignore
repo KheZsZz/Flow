@@ -5,3 +5,4 @@ pnpm-lock.yaml
 .temp
 .env.development
 .env.production
+.idea
