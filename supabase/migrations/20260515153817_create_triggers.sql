@@ -5,9 +5,8 @@ BEGIN
     id,
     name,
     email,
-    password, -- Opcional: O Auth gerencia isso, mas se sua tabela exige, usamos um placeholder
+    password,
     type,
-    date_of_birth,
     cpf,
     avatar_url,
     is_active,
@@ -18,7 +17,6 @@ BEGIN
     new.email,
     'managed_by_auth',
     (COALESCE(new.raw_user_meta_data->>'type', 'Commum'))::UserType,
-    (new.raw_user_meta_data->>'date_of_birth')::DATE, -- Certifique-se de enviar no formato YYYY-MM-DD
     COALESCE(new.raw_user_meta_data->>'cpf', '000.000.000-00'),
     new.raw_user_meta_data->>'avatar_url',
     TRUE

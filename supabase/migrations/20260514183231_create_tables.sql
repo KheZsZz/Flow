@@ -38,7 +38,6 @@ CREATE TABLE Address(
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Necessário ter um Manager Geral para criar os outros usuários e empresas
 CREATE TABLE Users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     document_user VARCHAR(14) NOT NULL UNIQUE,
@@ -49,27 +48,51 @@ CREATE TABLE Users (
     profile UserType NOT NULL DEFAULT 'Commum',
     avatar_url text default 'https://png.pngtree.com/png-clipart/20200224/original/pngtree-avatar-icon-profile-icon-member-login-vector-isolated-png-image_5247852.jpg',
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    corporation_id UUID NOT NULL REFERENCES Corporations(id) ON DELETE CASCADE,
 
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    created_by UUID NOT NULL REFERENCES Users(id),
+    created_by UUID NOT NULL REFERENCES Users(id) ON DELETE CASCADE,
 );
 
--- # Empresas
+CREATE INDEX idx_users_email ON Users(email_user);
+
+CREATE TABLE Drivers (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES Users(id) ON DELETE CASCADE,
+    cnh VARCHAR(20) NOT NULL UNIQUE,
+    validade_cnh DATE NOT NULL,
+    categoria_cnh VARCHAR(20) NOT NULL,
+    mopp BOOLEAN NOT NULL default false,
+    moop_validade DATE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_by UUID NOT NULL REFERENCES Users(id) ON DELETE CASCADE,
+);
+
+
 CREATE TABLE Corporation (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR(255) NOT NULL,
     cnpj VARCHAR(14) NOT NULL UNIQUE,
-    address_id UUID NOT NULL REFERENCES Address(id),
+    address_id UUID NOT NULL REFERENCES Address(id) ON DELETE CASCADE,
     phone VARCHAR(20) NOT NULL,
-    manager_id UUID NOT NULL REFERENCES Users(id),
     logo_url VARCHAR(255),
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
 
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    created_by UUID NOT NULL REFERENCES Users(id),
+    created_by UUID NOT NULL REFERENCES Users(id) ON DELETE CASCADE
 );
+
+CREATE TABLE CorporationAdmins (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    corporation_id UUID NOT NULL REFERENCES Corporation(id) ON DELETE CASCADE,
+    manager_id UUID NOT NULL REFERENCES Users(id) ON DELETE CASCADE,
+    PRIMARY KEY (corporation_id, user_id)
+);
+
+CREATE INDEX idx_corporation_cnpj ON Corporation(cnpj);
 
 -- ## Veículos
 CREATE TABLE Vehicles (
@@ -86,14 +109,16 @@ CREATE TABLE Vehicles (
     created_by UUID NOT NULL REFERENCES Users(id),
 );
 
+CREATE INDEX idx_vehicles_license_plate ON Vehicles(license_plate);
+
 -- ### Realação M:M entre Veículos e empresa
 CREATE TABLE VehicleOwners (
-    vehicle_id UUID NOT NULL REFERENCES Vehicles(id),
-    corporation_id UUID NOT NULL REFERENCES Corporation(id),
+    corporation_id UUID NOT NULL REFERENCES Corporation(id) ON DELETE CASCADE,
+    vehicle_id UUID NOT NULL REFERENCES Vehicles(id) ON DELETE CASCADE,
 
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    created_by UUID NOT NULL REFERENCES Users(id),
+    created_by UUID NOT NULL REFERENCES Users(id) ON DELETE CASCADE,
 
     PRIMARY KEY (vehicle_id, corporation_id)
 );
@@ -109,7 +134,7 @@ CREATE TABLE Clients (
 
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    created_by UUID NOT NULL REFERENCES Users(id),
+    created_by UUID NOT NULL REFERENCES Users(id) ON DELETE CASCADE,
 );
 
 -- ## Tabela para Status gerais (ex: Pendente, Em Transito, Entregue, Cancelado)
@@ -121,7 +146,7 @@ CREATE TABLE Status (
 
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    created_by UUID NOT NULL REFERENCES Users(id),
+    created_by UUID NOT NULL REFERENCES Users(id) ON DELETE CASCADE
 );
 
 -- # Nfs e Ctes
@@ -133,8 +158,8 @@ CREATE TABLE Invoices (
     serie_nf VARCHAR(20) NOT NULL,
     cte VARCHAR(20) NOT NULL,
     value_nfe DECIMAL(10, 2) NOT NULL,
-    issuer_id UUID NOT NULL REFERENCES Clients(id),
-    receiver_id UUID NOT NULL REFERENCES Clients(id),
+    issuer_id UUID NOT NULL REFERENCES Clients(id) ON DELETE CASCADE,
+    receiver_id UUID NOT NULL REFERENCES Clients(id) ON DELETE CASCADE,
     issue_date DATE NOT NULL,
     nature_transaction VARCHAR(255) NOT NULL,
     weight_brute VARCHAR(255) NOT NULL,
@@ -152,20 +177,20 @@ CREATE TABLE Invoices (
 -- # Logica de Minuta de viagem
 CREATE TABLE Orders (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    company_id UUID NOT NULL REFERENCES Companies(id),
+    company_id UUID NOT NULL REFERENCES Companies(id) ON DELETE CASCADE,
 
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     created_by UUID NOT NULL REFERENCES Users(id),
 
-    status_id UUID NOT NULL REFERENCES Status(id),
+    status_id UUID NOT NULL REFERENCES Status(id) ON DELETE CASCADE,
 );
 
--- ## Comprovantes de entrega (integrar com bucket de arquivos)
+-- ## Comprovantes de entrega (deve integrar com bucket de arquivos)
 CREATE TABLE OrderReceipts (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    company_id UUID NOT NULL REFERENCES Companies(id),
-    order_item_id UUID NOT NULL REFERENCES OrderItem(id),
+    company_id UUID NOT NULL REFERENCES Companies(id)ON DELETE CASCADE,
+    order_item_id UUID NOT NULL REFERENCES OrderItem(id) ON DELETE CASCADE,
     url VARCHAR(255) NOT NULL,
 
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -176,8 +201,8 @@ CREATE TABLE OrderReceipts (
 -- ## Item de viagem
 CREATE TABLE OrderItem(
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    company_id UUID NOT NULL REFERENCES Companies(id),
-    invoice_id UUID NOT NULL REFERENCES Invoices(id),
+    company_id UUID NOT NULL REFERENCES Companies(id) ON DELETE CASCADE,
+    invoice_id UUID NOT NULL REFERENCES Invoices(id) ON DELETE CASCADE,
     type_orders OrderType NOT NULL DEFAULT 'Entrega',
     tracking VARCHAR(255),
 
@@ -194,7 +219,7 @@ CREATE TABLE TrackingEvents (
   OrderItem uuid references OrderItem(id) on delete cascade,
   locationItem text,
   descriptionItem text,
-  status_id UUID NOT NULL REFERENCES Status(id),
+  status_id UUID NOT NULL REFERENCES Status(id) ON DELETE CASCADE,
 
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
