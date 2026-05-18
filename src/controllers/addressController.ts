@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "Express";
-import { supabase } from "@/congif/supabase";
+import { supabase } from "@/config/supabase";
 import { AddressTypes } from "@/schemas/address";
 
-export class AdrresController {
+class AdrresController {
   async create(req: Request, res: Response, next: NextFunction) {
     const { street, city, state, zipCode }: AddressTypes = req.body;
     try {
@@ -17,11 +17,11 @@ export class AdrresController {
   }
   async update(req: Request, res: Response, next: NextFunction) {
     const { id } = req.params;
-    const { street, city, state, zipCode }: AddressTypes = req.body;
+    const { street, city, state, zip_code }: AddressTypes = req.body;
     try {
       const { data, error } = await supabase
         .from("address")
-        .update({ street, city, state, zipCode })
+        .update({ street, city, state, zip_code })
         .eq("id", id);
       if (error) throw error;
       res.status(200).json({ message: "Address updated successfully", data });
@@ -56,3 +56,5 @@ export class AdrresController {
     }
   }
 }
+
+export const addressController = new AddressController();
