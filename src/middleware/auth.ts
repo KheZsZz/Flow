@@ -1,13 +1,20 @@
 import { Request, Response, NextFunction } from "express";
 import { User } from "@supabase/supabase-js";
 import { supabase } from "@/config/supabase";
+import { INSPECT_MAX_BYTES } from "buffer";
 
 export interface AuthRequest extends Request {
   user?: User;
+  company?: {
+    id: string;
+    name: string;
+    logo_url: string;
+    is_active: boolean;
+  };
 }
 
-export class AuthMiddleware {
-  async authMiddleware(req: AuthRequest, res: Response, next: NextFunction) {
+class AuthMiddleware {
+  async authUser(req: AuthRequest, res: Response, next: NextFunction) {
     const authHeader = req.headers.authorization;
     const token = authHeader?.split(" ")[1];
     if (!token) return res.status(401).json({ error: "Token not provided" });
@@ -27,14 +34,53 @@ export class AuthMiddleware {
     next();
   }
 
-  async isManager(req: AuthRequest, res: Response, next: NextFunction) {
+  async reqCompany(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const userId = req.user?.id;
+      const { data, error } = await supabase
+        .from("CorporationAdmins")
+        .select(
+          `
+            manager_id,
+            Corporation (
+              id,
+              name,
+              cnpj,
+              logo_url,
+              is_active
+            )
+          `,
+        )
+        .eq("manager_id", userId)
+        .single(); // trazer apenas um (verificar, os usuarios que fazem parte de mais de uma empresa)
+
+      if (error || !data || !data.Corporation) {
+        return res
+          .status(403)
+          .json({ error: "User is not linked to any corporation" });
+      }
+      const company = data.Corporation as any;
+      if (company.is_active === false) {
+        return res
+          .status(403)
+          .json({ error: "This corporation account is inactive/suspended" });
+      }
+
+      req.company = company;
+      next();
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async isAdmin(req: AuthRequest, res: Response, next: NextFunction) {
     const user = req.user;
     if (!user) {
       return res.status(401).json({ error: "User not authenticated" });
     }
     const profile = user.user_metadata?.profile;
 
-    if (profile !== "manager") {
+    if (profile !== "admin") {
       return res.status(403).json({
         error: "Access denied: Administrators only",
       });
@@ -42,3 +88,5 @@ export class AuthMiddleware {
     next();
   }
 }
+
+export const authMiddleware = new AuthMiddleware();

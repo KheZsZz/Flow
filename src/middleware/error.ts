@@ -2,13 +2,11 @@ import { Request, Response, NextFunction } from "express";
 import { ZodError } from "zod";
 
 export const errorHandler = (
-  err: any, // Usamos any aqui para capturar diversos tipos de erro, ou um Union Type
+  err: any,
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
-  console.error(`\x1b[31m[Error]: ${err.message}\x1b[0m`);
-
   if (err instanceof ZodError) {
     return res.status(400).json({
       status: "validation_error",
@@ -19,6 +17,9 @@ export const errorHandler = (
       })),
     });
   }
+
+  // 405
+  // 404
 
   if (err.status === 401 || err.message.includes("invalid claim")) {
     return res.status(401).json({
