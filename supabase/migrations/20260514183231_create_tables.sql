@@ -158,7 +158,8 @@ CREATE TABLE Invoices (
     nfe VARCHAR(20) NOT NULL,
     serie_nf VARCHAR(20) NOT NULL,
     cte VARCHAR(20) NOT NULL,
-    value_nfe DECIMAL(10, 2) NOT NULL,
+    cte_value DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+    value_nfe DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
     issuer_id UUID NOT NULL REFERENCES Clients(id) ON DELETE CASCADE,
     receiver_id UUID NOT NULL REFERENCES Clients(id) ON DELETE CASCADE,
     issue_date DATE NOT NULL,
@@ -173,6 +174,7 @@ CREATE TABLE Invoices (
     created_by UUID NOT NULL REFERENCES Users(id),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    corporation_id UUID NOT NULL REFERENCES Corporation(id) ON DELETE CASCADE
 );
 
 -- # Logica de Minuta de viagem

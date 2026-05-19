@@ -13,7 +13,9 @@ export const invoiceSchema = z.object({
     nfe: z.string().min(1, 'O número da NF-e é obrigatório').max(20),
     serie_nf: z.string().min(1, 'A série da NF-e é obrigatória').max(20),
     cte: z.string().min(1, 'O CT-e é obrigatório').max(20),
-  
+    cte_value: z.coerce.number()
+        .min(0, 'O valor do CT-e não pode ser negativo')
+        .multipleOf(0.01, 'O valor deve ter no máximo 2 casas decimais'),
     value_nfe: z.coerce
         .number()
         .min(0, 'O valor da NF-e não pode ser negativo')
@@ -21,7 +23,6 @@ export const invoiceSchema = z.object({
     
     issuer_id: z.string().uuid('ID do emitente inválido'),
     receiver_id: z.string().uuid('ID do destinatário inválido'),
-  
 
     issue_date: z.coerce.date({ error: 'A data de emissão é obrigatória' }),
   
@@ -36,7 +37,8 @@ export const invoiceSchema = z.object({
     created_by: z.string().uuid('ID do criador inválido').optional(),
     created_at: z.coerce.date().optional(),
     updated_at: z.coerce.date().optional(),
+    corporation_id: z.string().uuid('ID da empresa inválido').optional()
 });
 
 
-export type Invoice = z.infer<typeof invoiceSchema>;
+export type InvoiceTypes = z.infer<typeof invoiceSchema>;
