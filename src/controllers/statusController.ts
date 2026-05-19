@@ -1,12 +1,12 @@
-import { Request, Response, NextFunction } from "Express";
+import { Request, Response, NextFunction } from "express";
 import { supabase } from "@/config/supabase";
 import { AuthRequest } from "@/middleware/auth";
-import { StatusTypes } from "@/schemas/statusSchema";
+import { statusSchema, StatusTypes } from "@/schemas/statusSchema";
 
 class statusController {
   async create(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const { code, name, description }: StatusTypes = req.body;
+      const { code, name, description }: StatusTypes = statusSchema.parse(req.body);
 
       if (!req.company?.id || !req.user?.id) {
         return res
@@ -62,7 +62,7 @@ class statusController {
   async update(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const { name, description }: StatusTypes = req.body;
+      const { name, description }: StatusTypes = statusSchema.parse(req.body);
 
       if (!req.company?.id) {
         return res

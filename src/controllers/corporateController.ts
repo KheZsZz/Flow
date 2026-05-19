@@ -1,12 +1,12 @@
-import { Request, Response, NextFunction } from "Express";
+import { Request, Response, NextFunction } from "express";
 import { supabase } from "@/config/supabase";
-import { corporateType } from "@/schemas/corporateSchema";
+import { CoporateSchema, coporateType } from "@/schemas/corporateSchema";
 import { AuthRequest } from "@/middleware/auth";
 
 // Endereço no cadastro ainda não integrado.
 class CorporateController {
   async create(req: AuthRequest, res: Response, next: NextFunction) {
-    const { name, cnpj, phone, logo_url, manager_id }: corporateType = req.body;
+    const { name, cnpj, phone, logo_url, manager_id }: coporateType = CoporateSchema.parse(req.body);
 
     const { data, error } = await supabase
       .from("corporates")
@@ -16,7 +16,7 @@ class CorporateController {
         phone,
         logo_url,
         manager_id,
-        created_by: req.user.id,
+        created_by: req.user?.id,
       })
       .select();
 
@@ -25,7 +25,7 @@ class CorporateController {
   }
 
   async update(req: AuthRequest, res: Response, next: NextFunction) {
-    const { name, cnpj, phone, logo_url }: corporateType = req.body;
+    const { name, cnpj, phone, logo_url }: coporateType = CoporateSchema.parse(req.body);
     const { data, error } = await supabase
       .from("corporates")
       .update({
@@ -34,7 +34,7 @@ class CorporateController {
         phone,
         logo_url,
       })
-      .eq("id")
+      .eq("id", req.params.id)
       .select();
 
     if (error) throw error;

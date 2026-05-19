@@ -1,12 +1,12 @@
-import { Request, Response, NextFunction } from "Express";
+import { Request, Response, NextFunction } from "express";
 import { AuthRequest } from "@/middleware/auth";
 import { supabase } from "@/config/supabase";
-import { userType } from "@/schemas/userSchemas";
+import { UserSchema, UserType } from "@/schemas/usersSchema";
 
 class UserController {
   async create(req: AuthRequest, res: Response, next: NextFunction) {
-    const { document_user, name_user, email_user, password_user }: userType =
-      req.body;
+    const { document_user, name_user, email_user, password_user }: UserType =
+      UserSchema.parse(req.body);
 
     const { data, error } = await supabase
       .from("users")
@@ -33,7 +33,7 @@ class UserController {
       password_user,
       avatar_url,
       created_by,
-    }: userType = req.body;
+    }: UserType = UserSchema.parse(req.body);
     try {
       const { data, error } = await supabase
         .from("users")

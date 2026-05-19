@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { blacklistedDomains, UserTypeSchema } from "@/schemas/enuns";
+import { blacklistedDomains, UserTypeSchema } from "@/schemas/enumSchema";
 
 export const UserSchema = z.object({
   id: z.string().uuid().optional(),
@@ -72,6 +72,13 @@ export const UserSchema = z.object({
   
   is_active: z.boolean().default(true),
   created_by: z.string().uuid("ID do criador inválido"),
+  phone_user: z
+    .string()
+    .max(16, { message: "O telefone deve ter no máximo 16 caracteres" })
+    .regex(/^\(\d{2}\)\s\d\.\d{4}-\d{4}$/, {
+      message: "O telefone deve estar no formato (XX) 9.XXXX-XXXX",
+    }),
+  profile: UserTypeSchema.default("Commum").optional(),
 });
 
 export const RegisterUserSchema = UserSchema.omit({ 
