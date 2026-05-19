@@ -47,6 +47,7 @@ CREATE TABLE Users (
     phone VARCHAR(20) NOT NULL,
     profile UserType NOT NULL DEFAULT 'Commum',
     avatar_url text default 'https://png.pngtree.com/png-clipart/20200224/original/pngtree-avatar-icon-profile-icon-member-login-vector-isolated-png-image_5247852.jpg',
+    --Alterar esse carai de imagem
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     corporation_id UUID NOT NULL REFERENCES Corporations(id) ON DELETE CASCADE,
 
@@ -238,7 +239,16 @@ CREATE TABLE Order_add_itens (
 
 
 CREATE TABLE Fuel (
-    id uuid default gen_random_uuid() primary key,
-    vehicle_id uuid references Vehicles(id) on delete cascade,
-
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    vehicle_id UUID NOT NULL REFERENCES Vehicles(id) ON DELETE CASCADE,
+    liters DECIMAL(10, 2) NOT NULL,
+    current_odometer INT NOT NULL,
+    total_price DECIMAL(10, 2),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_by UUID NOT NULL REFERENCES Users(id)
 );
+
+
+ALTER TABLE Orders RENAME COLUMN company_id TO corporation_id;
+ALTER TABLE OrderItem RENAME COLUMN company_id TO corporation_id;
+ALTER TABLE OrderReceipts RENAME COLUMN company_id TO corporation_id;
