@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { User } from "@supabase/supabase-js";
 import { supabase } from "@/config/supabase";
-import { INSPECT_MAX_BYTES } from "buffer";
 
 export interface AuthRequest extends Request {
   user?: User;

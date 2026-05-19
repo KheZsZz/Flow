@@ -1,12 +1,11 @@
 import { Request, Response, NextFunction } from "Express";
 import { AuthRequest } from "@/middleware/auth";
 import { supabase } from "@/config/supabase";
-import { VehicleTypes } from "@/schemas/vehicle";
+import { vehicleSchema, vehicleOwnerSchema, VehicleType } from "@/schemas/vehicleSchema";
 
 class VehicleController {
   async create(req: AuthRequest, res: Response, next: NextFunction) {
-    const { make, model, year, type, license_plate, is_active }: VehicleTypes =
-      req.body;
+    const { make, model, year, type, license_plate, is_active } = vehicleSchema.parse(req.body);
 
     if (!req.company?.id || !req.user?.id) {
       return res
@@ -64,7 +63,7 @@ class VehicleController {
         type,
         license_plate,
         is_active,
-      }: VehicleTypes = req.body;
+      }: VehicleType = vehicleSchema.parse(req.body);
 
       const { data: updatedVehicle, error: updateError } = await supabase
         .from("vehicles")
