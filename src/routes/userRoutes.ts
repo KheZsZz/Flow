@@ -16,6 +16,6 @@ router.delete("/:id", userController.disable);
 router.get("/:id", userController.findbyId);
 router.get("/drivers", userController.findAllDrivers);
 
-router.get("/", authMiddleware.isAdmin, userController.findAll);
+router.get("/", authMiddleware.authUser,authMiddleware.isAdmin, userController.findAll);
 
 export default router;

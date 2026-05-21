@@ -79,7 +79,7 @@ class AuthMiddleware {
     }
     const profile = user.user_metadata?.profile;
 
-    if (profile !== "admin") {
+    if (profile !== "Admin" && profile !== "Manager") {
       return res.status(403).json({
         error: "Access denied: Administrators only",
       });

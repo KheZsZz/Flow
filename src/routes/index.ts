@@ -8,7 +8,8 @@ import vehicleRoutes from "@/routes/vehicleRoutes";
 import addressRoutes from "@/routes/addressRoutes";
 import statusRoutes from "@/routes/statusRoutes";
 
-export const router = Router();
+
+const router = Router();
 
 router.use("/auth", authRoutes);
 
@@ -17,7 +18,7 @@ router.use("/address", addressRoutes);
 router.use("/corporate", corporateRoutes);
 
 router.use(
-  "/user",
+  "/users",
   userRoutes,
   authMiddleware.authUser,
   authMiddleware.reqCompany,

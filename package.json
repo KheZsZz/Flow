@@ -17,7 +17,7 @@
     "Logística"
   ],
   "author": "Kevin Oliveira",
-  "packageManager": "pnpm@10.33.2",
+  "packageManager": "pnpm@11.1.3",
   "license": "ISC",
   "devDependencies": {
     "@types/cors": "^2.8.19",

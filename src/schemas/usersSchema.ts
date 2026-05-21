@@ -4,11 +4,6 @@ import { blacklistedDomains, UserTypeSchema } from "@/schemas/enumSchema";
 export const UserSchema = z.object({
   id: z.string().uuid().optional(),
 
-  date_of_birth: z.preprocess((arg) => {
-    if (typeof arg === "string" && arg.trim() !== "") return new Date(arg);
-    return arg;
-  }, z.date({ error: "Data de nascimento inválida" })),
-  
   document_user: z
     .string()
     .transform((val) => val.replace(/\D/g, ""))
@@ -65,8 +60,6 @@ export const UserSchema = z.object({
   }, {
     message: "A senha não pode conter números em sequência (ex: 12, 45).",
   }),
-
-  type_user: UserTypeSchema.default("Commum"), 
   
   avatar_url: z.string().url("URL do avatar inválida").max(255).nullish().optional(),
   
@@ -78,7 +71,7 @@ export const UserSchema = z.object({
     .regex(/^\(\d{2}\)\s\d\.\d{4}-\d{4}$/, {
       message: "O telefone deve estar no formato (XX) 9.XXXX-XXXX",
     }),
-  profile: UserTypeSchema.default("Commum").optional(),
+  profile_user: UserTypeSchema.default("Commum").optional(),
 });
 
 export const RegisterUserSchema = UserSchema.omit({ 

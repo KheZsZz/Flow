@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "Express";
+import { Request, Response, NextFunction } from "express";
 import { AuthRequest } from "@/middleware/auth";
 import { supabase } from "@/config/supabase";
 import { vehicleSchema, vehicleOwnerSchema, VehicleType } from "@/schemas/vehicleSchema";

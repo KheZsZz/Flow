@@ -64,7 +64,7 @@ CREATE TABLE Users (
     profile_user UserType NOT NULL DEFAULT 'Commum',
     avatar_url text default 'https://api.dicebear.com/7.x/bottts/svg',
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
-    corporation_id UUID NOT NULL REFERENCES Corporation(id) ON DELETE CASCADE,
+    -- 'corporation_id UUID REFERENCES Corporation(id) ON DELETE CASCADE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     created_by UUID REFERENCES Users(id) ON DELETE CASCADE
@@ -195,15 +195,6 @@ CREATE TABLE Orders (
     status_id UUID NOT NULL REFERENCES Status(id) ON DELETE CASCADE
 );
 
-CREATE TABLE OrderReceipts (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    company_id UUID NOT NULL REFERENCES Corporation(id)ON DELETE CASCADE,
-    order_item_id UUID NOT NULL REFERENCES OrderItem(id) ON DELETE CASCADE,
-    url VARCHAR(255) NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    created_by UUID NOT NULL REFERENCES Users(id)
-);
 
 
 CREATE TABLE OrderItem(
@@ -218,6 +209,15 @@ CREATE TABLE OrderItem(
     status_id UUID NOT NULL REFERENCES Status(id) ON DELETE CASCADE
 );
 
+CREATE TABLE OrderReceipts (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    company_id UUID NOT NULL REFERENCES Corporation(id)ON DELETE CASCADE,
+    order_item_id UUID NOT NULL REFERENCES OrderItem(id) ON DELETE CASCADE,
+    url VARCHAR(255) NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_by UUID NOT NULL REFERENCES Users(id)
+);
 
 CREATE TABLE TrackingEvents (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,

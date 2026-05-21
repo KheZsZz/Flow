@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { AuthRequest } from "@/middleware/auth";
 import { supabase } from "@/config/supabase";
-import { LoginUserType, UserSchema, UserType } from "@/schemas/usersSchema";
+import { LoginUserType, UserSchema, LoginUserSchema } from "@/schemas/usersSchema";
 
 class UserController {
   async create(req: AuthRequest, res: Response, next: NextFunction) {
@@ -28,6 +28,16 @@ class UserController {
 
       if (authError) throw authError;
 
+      const { error: relError } = await supabase
+          .from('CorporationAdmins')
+          .insert({
+            corporation_id: req.company.id,
+            manager_id: authUser.user.id,
+            
+          });
+
+      if (relError) throw relError;
+
       return res.status(201).json({ 
         message: "User created successfully in Auth ecosystem. Database trigger will replicate data.", 
         data: authUser.user 
@@ -44,11 +54,10 @@ class UserController {
       
       const {
         phone_user,
-        type_user,
         document_user,
         name_user,
         email_user,
-        profile,
+        profile_user,
         password_user,
         avatar_url,
         is_active
@@ -72,11 +81,10 @@ class UserController {
       const { data, error: dbError } = await supabase
         .from("users")
         .update({
-          type_user,
           document_user,
           name_user,
           email_user,
-          profile,
+          profile_user,
           avatar_url,
           updated_at: new Date().toISOString()
         })
@@ -184,7 +192,7 @@ class UserController {
   }
 
   async signIn(req: Request, res: Response, next: NextFunction) {
-      const { email_user, password_user }: LoginUserType = req.body;
+      const { email_user, password_user }: LoginUserType = LoginUserSchema.parse(req.body);
   
       if (!email_user || !password_user) {
         return res
@@ -197,7 +205,7 @@ class UserController {
           email: email_user,
           password: password_user,
         });
-        if (error) return res.status(400).json({ error: error.message });
+        if (error) throw error;
         res
           .status(200)
           .json({ authorized: true, token: data.session.access_token });

@@ -1,0 +1,210 @@
+type: collection.insomnia.rest/5.0
+schema_version: "5.1"
+name: Flow
+meta:
+  id: wrk_52f3d3fb904c4010ba17b630d785420a
+  created: 1779319417260
+  modified: 1779319417260
+  description: ""
+collection:
+  - name: Users
+    meta:
+      id: fld_f79a68a7b56844da824d0e9bbf7d523e
+      created: 1779319461527
+      modified: 1779319461527
+      sortKey: -1779319461527
+      description: ""
+    children:
+      - url: "{{ _.localhost }}/users"
+        name: Get all
+        meta:
+          id: req_0973c105af6d49f18fe463f1d175e2a1
+          created: 1779319466896
+          modified: 1779319595088
+          isPrivate: false
+          description: ""
+          sortKey: -1779319471160
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/12.3.1
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.localhost }}/users"
+        name: Create
+        meta:
+          id: req_54d3639766c34d4cba88dd8a20dcb0f0
+          created: 1779319496425
+          modified: 1779319589419
+          isPrivate: false
+          description: ""
+          sortKey: -1779319496425
+        method: POST
+        headers:
+          - name: User-Agent
+            value: insomnia/12.3.1
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.localhost }}/users"
+        name: Update
+        meta:
+          id: req_5a9ce29364cc4728b26482a662127063
+          created: 1779319510476
+          modified: 1779319581425
+          isPrivate: false
+          description: ""
+          sortKey: -1779319510476
+        method: PUT
+        headers:
+          - name: User-Agent
+            value: insomnia/12.3.1
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.localhost }}/users"
+        name: Delete
+        meta:
+          id: req_4e6acdb3818b41e7a1c6ee3097266457
+          created: 1779319521069
+          modified: 1779319574600
+          isPrivate: false
+          description: ""
+          sortKey: -1779319521069
+        method: DELETE
+        headers:
+          - name: User-Agent
+            value: insomnia/12.3.1
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.localhost }}/users"
+        name: findById
+        meta:
+          id: req_5dbce5986ca74c1dafcee49b95bd6550
+          created: 1779319532639
+          modified: 1779319562886
+          isPrivate: false
+          description: ""
+          sortKey: -1779319532639
+        method: PATCH
+        headers:
+          - name: User-Agent
+            value: insomnia/12.3.1
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: Auth
+    meta:
+      id: fld_a7196d0680424f189147284dffe2ee31
+      created: 1779319940838
+      modified: 1779319940838
+      sortKey: -1779319940838
+      description: ""
+    children:
+      - url: "{{ _.localhost }}/auth/signin"
+        name: SingIn
+        meta:
+          id: req_ac69e3f162b549a6940d1e5e5ce5d72a
+          created: 1779319944469
+          modified: 1779320848846
+          isPrivate: false
+          description: ""
+          sortKey: -1779319944469
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"email_user": "kevinklgvg@gmail.com",
+            	"password_user": "IsaKev@10"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.3.1
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.localhost }}/auth/logout"
+        name: SingOut
+        meta:
+          id: req_2320b8d7c0674e76940caa21034fbca1
+          created: 1779319966043
+          modified: 1779320030490
+          isPrivate: false
+          description: ""
+          sortKey: -1779319966043
+        method: POST
+        headers:
+          - name: User-Agent
+            value: insomnia/12.3.1
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_aa031b37e61e4a150c98a033193bf40f10336555
+    created: 1779319417282
+    modified: 1779319417282
+environments:
+  name: Base Environment
+  meta:
+    id: env_aa031b37e61e4a150c98a033193bf40f10336555
+    created: 1779319417271
+    modified: 1779319814264
+    isPrivate: false
+  data:
+    localhost: http://localhost:8080/api

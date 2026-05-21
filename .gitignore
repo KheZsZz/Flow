@@ -1,8 +1,11 @@
 node_modules
 .env
-pnpm-workspace.yaml
-pnpm-lock.yaml
 .temp
+.idea
+.branches
+.vscode
+snippets
 .env.development
 .env.production
-.idea
+pnpm-workspace.yaml
+pnpm-lock.yaml
