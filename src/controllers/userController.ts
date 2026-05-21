@@ -1,51 +1,32 @@
 import { Request, Response, NextFunction } from "express";
 import { AuthRequest } from "@/middleware/auth";
 import { supabase } from "@/config/supabase";
-import { LoginUserType, UserSchema, LoginUserSchema } from "@/schemas/usersSchema";
+import { LoginUserType, UserSchema, LoginUserSchema, RegisterUserSchema } from "@/schemas/usersSchema";
 
 class UserController {
-  async create(req: AuthRequest, res: Response, next: NextFunction) {
-    try {
-      const { document_user, name_user, email_user, password_user } = UserSchema.parse(req.body);
+  async signUp(req: Request, res: Response, next: NextFunction) {
+      const { email_user, password_user, name_user, phone_user, profile_user, document_user, corporation_id } = RegisterUserSchema.parse(req.body);
 
-      if (!req.company?.id) {
-        return res.status(400).json({ error: "Contexto de empresa ausente." });
+      if (!email_user || !password_user || !name_user || !phone_user || !profile_user) {
+          return res.status(400).json({ error: 'All fields are required.' });
       }
 
-      const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
-        email: email_user,
-        password: password_user,
-        email_confirm: true, 
-        user_metadata: {
-          document_user,
-          name_user,
-          corporation_id: req.company?.id,
-          created_by: req.user?.id,
-          profile: "Commum",
-          is_active: true,
-        }
-      });
-
-      if (authError) throw authError;
-
-      const { error: relError } = await supabase
-          .from('CorporationAdmins')
-          .insert({
-            corporation_id: req.company.id,
-            manager_id: authUser.user.id,
-            
+      try {
+          const {data, error} = await supabase.auth.signUp({
+              email: email_user,
+              password: password_user,
+              options: {
+                  data: {
+                      name_user,
+                      phone_user,
+                      profile_user,
+                  }
+              }
           });
-
-      if (relError) throw relError;
-
-      return res.status(201).json({ 
-        message: "User created successfully in Auth ecosystem. Database trigger will replicate data.", 
-        data: authUser.user 
-      });
-
-    } catch (error) {
-      next(error);
-    }
+          res.status(201).json({ message: 'User registered successfully.', data, error});
+      } catch (error) {
+          next(error);
+      }
   }
 
   async update(req: AuthRequest, res: Response, next: NextFunction) {

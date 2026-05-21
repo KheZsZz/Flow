@@ -64,7 +64,7 @@ export const UserSchema = z.object({
   avatar_url: z.string().url("URL do avatar inválida").max(255).nullish().optional(),
   
   is_active: z.boolean().default(true),
-  created_by: z.string().uuid("ID do criador inválido"),
+  created_by: z.string().uuid("ID do criador inválido").optional(),
   phone_user: z
     .string()
     .max(16, { message: "O telefone deve ter no máximo 16 caracteres" })
@@ -72,6 +72,7 @@ export const UserSchema = z.object({
       message: "O telefone deve estar no formato (XX) 9.XXXX-XXXX",
     }),
   profile_user: UserTypeSchema.default("Commum").optional(),
+  corporation_id: z.string().uuid().optional(),
 });
 
 export const RegisterUserSchema = UserSchema.omit({ 

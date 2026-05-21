@@ -4,12 +4,7 @@ import { userController } from "@/controllers/userController";
 
 const router = express.Router();
 
-router.post(
-  "/",
-  authMiddleware.authUser,
-  authMiddleware.isAdmin,
-  userController.create,
-);
+router.post("/", userController.signUp);
 
 router.patch("/:id", userController.update);
 router.delete("/:id", userController.disable);

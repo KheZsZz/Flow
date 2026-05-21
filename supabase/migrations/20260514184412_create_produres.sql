@@ -18,8 +18,8 @@ CREATE TRIGGER set_timestamp_users BEFORE UPDATE ON Users FOR EACH ROW EXECUTE P
 DROP TRIGGER IF EXISTS set_timestamp_drivers ON Drivers;
 CREATE TRIGGER set_timestamp_drivers BEFORE UPDATE ON Drivers FOR EACH ROW EXECUTE PROCEDURE trigger_set_timestamp();
 
-DROP TRIGGER IF EXISTS set_timestamp_corporationAdmins ON CorporationAdmins;
-CREATE TRIGGER set_timestamp_corporationAdmins BEFORE UPDATE ON CorporationAdmins FOR EACH ROW EXECUTE PROCEDURE trigger_set_timestamp();
+DROP TRIGGER IF EXISTS set_timestamp_corporationUsers ON CorporationUsers;
+CREATE TRIGGER set_timestamp_corporationUsers BEFORE UPDATE ON CorporationUsers FOR EACH ROW EXECUTE PROCEDURE trigger_set_timestamp();
 
 DROP TRIGGER IF EXISTS set_timestamp_vehicles ON Vehicles;
 CREATE TRIGGER set_timestamp_vehicles BEFORE UPDATE ON Vehicles FOR EACH ROW EXECUTE PROCEDURE trigger_set_timestamp();

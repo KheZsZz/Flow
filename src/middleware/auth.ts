@@ -36,36 +36,33 @@ class AuthMiddleware {
   async reqCompany(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const userId = req.user?.id;
-      const { data, error } = await supabase
-        .from("CorporationAdmins")
-        .select(
-          `
-            manager_id,
-            Corporation (
-              id,
-              name,
-              cnpj,
-              logo_url,
-              is_active
-            )
-          `,
-        )
-        .eq("manager_id", userId)
-        .single(); // trazer apenas um (verificar, os usuarios que fazem parte de mais de uma empresa)
+      
+      if (!userId) throw next(); 
+        
+      console.log("User ID from token:", userId);
 
-      if (error || !data || !data.Corporation) {
-        return res
-          .status(403)
-          .json({ error: "User is not linked to any corporation" });
-      }
-      const company = data.Corporation as any;
-      if (company.is_active === false) {
-        return res
-          .status(403)
-          .json({ error: "This corporation account is inactive/suspended" });
-      }
+      
 
-      req.company = company;
+      // const { data, error } = await supabase
+      //   .from("corporationadmins")
+      //   .select('mamger_id, corporation(id, name, logo_url, is_active)').eq("mamger_id", userId)
+
+      // console.log("Company data:", data);
+      // console.log("Company error:", error);
+
+      // // if (error || !data || !data.corporation) {
+      // //   return res
+      // //     .status(403)
+      // //     .json({ error: "User is not linked to any corporation" });
+      // // }
+      // // const company = data.corporation as any;
+      // // if (company.is_active === false) {
+      // //   return res
+      // //     .status(403)
+      // //     .json({ error: "This corporation account is inactive/suspended" });
+      // // }
+
+      // // req.company = company;
       next();
     } catch (error) {
       next(error);

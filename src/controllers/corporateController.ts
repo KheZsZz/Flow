@@ -40,6 +40,17 @@ class CorporateController {
     if (error) throw error;
     res.status(200).json({ message: "Corporate updated successfully", data });
   }
+
+  async findById(req: AuthRequest, res: Response, next: NextFunction) {
+    const { data, error } = await supabase
+      .from("corporates")
+      .select("*")
+      .eq("id", req.company?.id)
+      .single();
+
+    if (error) throw error;
+    res.status(200).json({ message: "Corporate retrieved successfully", data });
+  }
 }
 
 export const corporateController = new CorporateController();

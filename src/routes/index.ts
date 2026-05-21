@@ -19,15 +19,13 @@ router.use("/corporate", corporateRoutes);
 
 router.use(
   "/users",
-  userRoutes,
-  authMiddleware.authUser,
-  authMiddleware.reqCompany,
+  userRoutes
 );
 router.use(
   "/vehicle",
-  vehicleRoutes,
   authMiddleware.authUser,
   authMiddleware.reqCompany,
+  vehicleRoutes
 );
 
 router.use(
