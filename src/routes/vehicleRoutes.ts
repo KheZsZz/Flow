@@ -4,9 +4,9 @@ import { vehicleController } from "@/controllers/vehicleController";
 
 const router = express.Router();
 
-router.post("/", vehicleController.create);
-router.put("/:id", vehicleController.update);
-router.delete("/:id", vehicleController.delete);
+router.post("/",authMiddleware.requireRole('Admin') ,vehicleController.create);
+router.put("/:id", authMiddleware.requireRole('Admin'), vehicleController.update);
+router.delete("/:id", authMiddleware.requireRole('Admin'), vehicleController.delete);
 router.get("/:id", vehicleController.findById);
 router.get("/", vehicleController.findAll);
 

@@ -1,83 +1,101 @@
-  import { Request, Response, NextFunction } from "express";
-  import { AuthRequest } from "@/middleware/auth";
-  import { supabase } from "@/config/supabase";
-  import { LoginUserType, UserSchema, LoginUserSchema, RegisterUserSchema } from "@/schemas/usersSchema";
+import { Request, Response, NextFunction } from "express";
+import { AuthRequest } from "@/middleware/auth";
+import { supabase, supabaseAdmin } from "@/config/supabase";
+import { LoginUserType, UserSchema, LoginUserSchema, RegisterUserSchema } from "@/schemas/usersSchema";
+import { toE164 } from "@/utils/convert_phone";
 
-  class UserController {
+class UserController {
+
     async signUp(req: AuthRequest, res: Response, next: NextFunction) {
-        const {  
-          name_user,
-          email_user,
-          password_user,
-          phone_user, 
-          profile_user, 
-        } = RegisterUserSchema.parse(req.body);
+      const { name_user, email_user, password_user, phone_user, profile_user } =
+        RegisterUserSchema.parse(req.body);
 
-        if (!email_user || !password_user || !name_user || !phone_user || !profile_user) {
-            return res.status(400).json({ error: 'All fields are required.' });
+      try {
+        const { data, error } = await supabase.auth.signUp({
+          email: email_user,
+          password: password_user,
+          options: {
+            data: {
+              name_user,
+              phone_user,
+              profile_user,
+              created_by: req.user?.id,
+            },
+          },
+        });
+
+        if (error) throw error;
+        if (!data.user) {
+          return res.status(500).json({ error: "Falha ao criar usuário" });
         }
-        
-        try {
-            const {data, error} = await supabase.auth.signUp({
-                email: email_user,
-                password: password_user,
-                options: {
-                    data: {
-                        name_user,
-                        phone_user,
-                        profile_user,
-                        created_by:req.user?.id,
-                    }
-                }
-            });
-            res.status(201).json({ message: 'User registered successfully.', data, error});
-        } catch (error) {
-            next(error);
-        }
+
+
+        const { error: corpError } = await supabase
+          .from("CorporationUsers")
+          .insert({
+            corporation_id: req.company?.id,
+            manager_id: data.user.id,
+          });
+
+        if (corpError) throw corpError;
+
+        return res.status(201).json({
+          message: "User registered successfully.",
+          data,
+        });
+      } catch (error) {
+        next(error);
+      }
     }
 
     async update(req: AuthRequest, res: Response, next: NextFunction) {
       try {
-        const { id } = req.params; 
-        
+        const { id } = req.params;
+
         const {
           phone_user,
-          document_user,
           name_user,
           email_user,
           profile_user,
           password_user,
           avatar_url,
-          is_active
+          is_active,
         } = UserSchema.parse(req.body);
 
-        if (!req.company?.id) {
-          return res.status(400).json({ error: "Contexto de empresa ausente." });
+
+        const { data: belongs, error: belongsError } = await supabaseAdmin
+          .from("corporationusers")
+          .select("manager_id")
+          .eq("manager_id", id)
+          .eq("corporation_id", req.company?.id)
+          .single();
+
+        if (belongsError || !belongs) {
+          return res.status(403).json({ error: "User does not belong to your corporation" });
         }
 
         const updateAuthParams: any = {};
-
         if (email_user) updateAuthParams.email = email_user;
         if (password_user) updateAuthParams.password = password_user;
-        if (phone_user) updateAuthParams.phone = phone_user;
+        if (phone_user) updateAuthParams.phone = toE164(phone_user);
 
         if (Object.keys(updateAuthParams).length > 0) {
-          const { error: authUpdateError } = await supabase.auth.admin.updateUserById(id as string, updateAuthParams);
+          const { error: authUpdateError } = await supabaseAdmin.auth.admin.updateUserById(id as string, updateAuthParams);
           if (authUpdateError) throw authUpdateError;
         }
+
 
         const { data, error: dbError } = await supabase
           .from("users")
           .update({
-            document_user,
             name_user,
             email_user,
             profile_user,
             avatar_url,
-            updated_at: new Date().toISOString()
+            is_active,       
+            updated_at: new Date().toISOString(),
           })
-          .eq("id", id)
-          .eq("corporation_id", req.company?.id) 
+          .eq("id", id)      
           .select()
           .single();
 
@@ -94,7 +112,7 @@
       try {
         const { data, error } = await supabase
           .from("users")
-          .update({ is_active: true })
+          .update({ is_active: false })
           .eq("id", id);
         if (error) throw error;
         res.status(200).json({ message: "User disabled successfully", data });

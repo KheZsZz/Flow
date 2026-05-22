@@ -15,7 +15,7 @@ CREATE TABLE Address(
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA extensions;
+
 
 INSERT INTO Address (street, neighborhood, city, state, zip_code) VALUES
 ('Rua Agnaldo Ferreira Lopez, 05', 'Potuvera', 'São Paulo', 'SP', '06852-845'),
@@ -23,6 +23,8 @@ INSERT INTO Address (street, neighborhood, city, state, zip_code) VALUES
 ('Praça Modelo', 'Funcionários', 'Belo Horizonte', 'MG', '34567-890'),
 ('Av. Paulista, 1000', 'Centro','São Paulo', 'SP', '01310-100'),
 ('Rua Augusta, 500', 'Centro', 'São Paulo', 'SP', '01305-000');
+
+CREATE INDEX idx_zip_code ON Address(zip_code);
 
 
 CREATE TABLE Users (
@@ -41,6 +43,9 @@ CREATE TABLE Users (
 );
 
 CREATE INDEX idx_users_email ON Users(email_user);
+
+GRANT ALL ON public.users TO supabase_auth_admin;
+GRANT USAGE ON SCHEMA public TO supabase_auth_admin;
 
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
@@ -62,14 +67,14 @@ BEGIN
     new.email,
     'managed_by_auth',
     COALESCE(new.raw_user_meta_data->>'phone_user', '(00) 0.0000-0000'),
-    (COALESCE(new.raw_user_meta_data->>'profile_user', 'Commum'))::UserType,
+    (COALESCE(new.raw_user_meta_data->>'profile_user', 'Commum'))::public.UserType,
     COALESCE(new.raw_user_meta_data->>'avatar_url', 'https://api.dicebear.com/7.x/bottts/svg'),
     TRUE,
-    NULL  
+    NULL
   );
   RETURN new;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created 

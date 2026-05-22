@@ -17,10 +17,7 @@ router.use("/address", addressRoutes);
 
 router.use("/corporate", corporateRoutes);
 
-router.use(
-  "/users",
-  userRoutes
-);
+router.use("/users", userRoutes);
 router.use(
   "/vehicle",
   authMiddleware.authUser,

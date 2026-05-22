@@ -20,7 +20,7 @@ collection:
         meta:
           id: req_0973c105af6d49f18fe463f1d175e2a1
           created: 1779319466896
-          modified: 1779319595088
+          modified: 1779412154952
           isPrivate: false
           description: ""
           sortKey: -1779319471160
@@ -30,6 +30,14 @@ collection:
             value: insomnia/12.3.1
             description: ""
             disabled: false
+          - name: Authorization
+            value: Bearer {% response 'body', 'req_ac69e3f162b549a6940d1e5e5ce5d72a',
+              'b64::JC50b2tlbg==::46b', 'always', 60 %}
+            description: ""
+            disabled: false
+        authentication:
+          type: bearer
+          token: eyJhbGciOiJFUzI1NiIsImtpZCI6Ijc4ZmUzZWExLWRmYTktNDZkZS05YjQyLWQ2YjllMTExZmI5OCIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2R6cnVwam5ic3l2dmhkeXlpcm1xLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiI4M2ViNTRjYy1hMDM5LTQ0ZWYtYTAyNC1kMmZiYzk3NDUzOTQiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzc5MzM1NDQ0LCJpYXQiOjE3NzkzMzE4NDQsImVtYWlsIjoia2V2aW5rbGd2Z0BnbWFpbC5jb20iLCJwaG9uZSI6IiIsImFwcF9tZXRhZGF0YSI6eyJwcm92aWRlciI6ImVtYWlsIiwicHJvdmlkZXJzIjpbImVtYWlsIl19LCJ1c2VyX21ldGFkYXRhIjp7ImRvY3VtZW50X3VzZXIiOiIyMzguNjEwLjY2OC0zMSIsIm5hbWVfdXNlciI6IktldmluIE9saXZlaXJhIiwicGhvbmUiOiIoMTEpIDkuOTU3Ny04NTczIiwicHJvZmlsZV91c2VyIjoibWFuYWdlciJ9LCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImFhbCI6ImFhbDEiLCJhbXIiOlt7Im1ldGhvZCI6InBhc3N3b3JkIiwidGltZXN0YW1wIjoxNzc5MzMxODQ0fV0sInNlc3Npb25faWQiOiJkNDMzNzZiYi1kZTgxLTRhMzgtYTY1Zi01MzNkNjRhZjMwNWMiLCJpc19hbm9ueW1vdXMiOmZhbHNlfQ.xW7ZJvdVe0hm8z3o2toh_NrvQvXYYv6u2NfR8FFby2hdtoUkYat4XR7RrgcPWiCgWHA42mBzWPDd26J0202xxA
         settings:
           renderRequestBody: true
           encodeUrl: true
@@ -43,16 +51,37 @@ collection:
         meta:
           id: req_54d3639766c34d4cba88dd8a20dcb0f0
           created: 1779319496425
-          modified: 1779319589419
+          modified: 1779410572921
           isPrivate: false
           description: ""
           sortKey: -1779319496425
         method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "name_user": "Teste User",
+              "email_user": "teste2@flow.com.br",
+              "password_user": "FlowTeste@2A",
+              "phone_user": "(11) 9.9999-0000",
+              "profile_user": "Commum"
+            }
         headers:
+          - name: Content-Type
+            value: application/json
           - name: User-Agent
             value: insomnia/12.3.1
             description: ""
             disabled: false
+          - name: Authorization
+            value: Bearer {% response 'body', 'req_ac69e3f162b549a6940d1e5e5ce5d72a',
+              'b64::JC50b2tlbg==::46b', 'always', 60 %}
+            description: ""
+            disabled: false
+        authentication:
+          type: bearer
+          disabled: true
+          token: eyJhbGciOiJFUzI1NiIsImtpZCI6Ijc4ZmUzZWExLWRmYTktNDZkZS05YjQyLWQ2YjllMTExZmI5OCIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2R6cnVwam5ic3l2dmhkeXlpcm1xLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiI4M2ViNTRjYy1hMDM5LTQ0ZWYtYTAyNC1kMmZiYzk3NDUzOTQiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzc5MzQzNTExLCJpYXQiOjE3NzkzMzk5MTEsImVtYWlsIjoia2V2aW5rbGd2Z0BnbWFpbC5jb20iLCJwaG9uZSI6IiIsImFwcF9tZXRhZGF0YSI6eyJwcm92aWRlciI6ImVtYWlsIiwicHJvdmlkZXJzIjpbImVtYWlsIl19LCJ1c2VyX21ldGFkYXRhIjp7ImRvY3VtZW50X3VzZXIiOiIyMzguNjEwLjY2OC0zMSIsIm5hbWVfdXNlciI6IktldmluIE9saXZlaXJhIiwicGhvbmUiOiIoMTEpIDkuOTU3Ny04NTczIiwicHJvZmlsZV91c2VyIjoibWFuYWdlciJ9LCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImFhbCI6ImFhbDEiLCJhbXIiOlt7Im1ldGhvZCI6InBhc3N3b3JkIiwidGltZXN0YW1wIjoxNzc5MzM5OTExfV0sInNlc3Npb25faWQiOiI3YTk0ODE4Yi05NTE5LTRhYmYtOTAyYS1hYzM0OWJiOTA1OTQiLCJpc19hbm9ueW1vdXMiOmZhbHNlfQ.NbpaXsKiGe7v6gTXQdlIk1pberXMN9AfCkxo5pNyCQJogR6IfGyfrt4anxrVeNEh5zpqj1pbo9lIuVYJc4leAA
         settings:
           renderRequestBody: true
           encodeUrl: true
@@ -61,21 +90,42 @@ collection:
             send: true
             store: true
           rebuildPath: true
-      - url: "{{ _.localhost }}/users"
+      - url: "{{ _.localhost }}/users/7eb5f886-327f-46f8-9394-482a46fcd6a9"
         name: Update
         meta:
           id: req_5a9ce29364cc4728b26482a662127063
           created: 1779319510476
-          modified: 1779319581425
+          modified: 1779415210880
           isPrivate: false
           description: ""
           sortKey: -1779319510476
         method: PUT
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "name_user": "Teste User Atualizado",
+              "email_user": "teste2@flow.com.br",
+              "password_user": "FlowTeste@2B",
+              "phone_user": "(11) 9.0000-0000",
+              "profile_user": "Driver",
+              "avatar_url": "https://api.dicebear.com/7.x/bottts/svg",
+              "is_active": true
+            }
         headers:
+          - name: Content-Type
+            value: application/json
           - name: User-Agent
             value: insomnia/12.3.1
             description: ""
             disabled: false
+          - name: Authorization
+            value: Bearer {% response 'body', 'req_ac69e3f162b549a6940d1e5e5ce5d72a',
+              'b64::JC50b2tlbg==::46b', 'always', 60 %}
+            description: ""
+            disabled: false
+        authentication:
+          type: bearer
         settings:
           renderRequestBody: true
           encodeUrl: true
@@ -84,12 +134,12 @@ collection:
             send: true
             store: true
           rebuildPath: true
-      - url: "{{ _.localhost }}/users"
+      - url: "{{ _.localhost }}/users/7eb5f886-327f-46f8-9394-482a46fcd6a9"
         name: Delete
         meta:
           id: req_4e6acdb3818b41e7a1c6ee3097266457
           created: 1779319521069
-          modified: 1779319574600
+          modified: 1779415618741
           isPrivate: false
           description: ""
           sortKey: -1779319521069
@@ -99,6 +149,11 @@ collection:
             value: insomnia/12.3.1
             description: ""
             disabled: false
+          - name: Authorization
+            value: Bearer {% response 'body', 'req_ac69e3f162b549a6940d1e5e5ce5d72a',
+              'b64::JC50b2tlbg==::46b', 'always', 60 %}
+            description: ""
+            disabled: false
         settings:
           renderRequestBody: true
           encodeUrl: true
@@ -107,19 +162,24 @@ collection:
             send: true
             store: true
           rebuildPath: true
-      - url: "{{ _.localhost }}/users"
+      - url: "{{ _.localhost }}/users/7eb5f886-327f-46f8-9394-482a46fcd6a9"
         name: findById
         meta:
           id: req_5dbce5986ca74c1dafcee49b95bd6550
           created: 1779319532639
-          modified: 1779319562886
+          modified: 1779415704181
           isPrivate: false
           description: ""
           sortKey: -1779319532639
-        method: PATCH
+        method: GET
         headers:
           - name: User-Agent
             value: insomnia/12.3.1
+            description: ""
+            disabled: false
+          - name: Authorization
+            value: Bearer {% response 'body', 'req_ac69e3f162b549a6940d1e5e5ce5d72a',
+              'b64::JC50b2tlbg==::46b', 'always', 60 %}
             description: ""
             disabled: false
         settings:
@@ -138,12 +198,12 @@ collection:
       sortKey: -1779319940838
       description: ""
     children:
-      - url: "{{ _.localhost }}/auth/signin"
+      - url: http://localhost:8080/api/auth/signin
         name: SingIn
         meta:
           id: req_ac69e3f162b549a6940d1e5e5ce5d72a
           created: 1779319944469
-          modified: 1779320848846
+          modified: 1779402600001
           isPrivate: false
           description: ""
           sortKey: -1779319944469
@@ -175,7 +235,7 @@ collection:
         meta:
           id: req_2320b8d7c0674e76940caa21034fbca1
           created: 1779319966043
-          modified: 1779320030490
+          modified: 1779331740150
           isPrivate: false
           description: ""
           sortKey: -1779319966043
@@ -183,6 +243,134 @@ collection:
         headers:
           - name: User-Agent
             value: insomnia/12.3.1
+            description: ""
+            disabled: false
+        authentication:
+          type: bearer
+          token: eyJhbGciOiJFUzI1NiIsImtpZCI6Ijc4ZmUzZWExLWRmYTktNDZkZS05YjQyLWQ2YjllMTExZmI5OCIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2R6cnVwam5ic3l2dmhkeXlpcm1xLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiI4M2ViNTRjYy1hMDM5LTQ0ZWYtYTAyNC1kMmZiYzk3NDUzOTQiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzc5MzM1MzIwLCJpYXQiOjE3NzkzMzE3MjAsImVtYWlsIjoia2V2aW5rbGd2Z0BnbWFpbC5jb20iLCJwaG9uZSI6IiIsImFwcF9tZXRhZGF0YSI6eyJwcm92aWRlciI6ImVtYWlsIiwicHJvdmlkZXJzIjpbImVtYWlsIl19LCJ1c2VyX21ldGFkYXRhIjp7ImRvY3VtZW50X3VzZXIiOiIyMzguNjEwLjY2OC0zMSIsIm5hbWVfdXNlciI6IktldmluIE9saXZlaXJhIiwicGhvbmUiOiIoMTEpIDkuOTU3Ny04NTczIiwicHJvZmlsZV91c2VyIjoibWFuYWdlciJ9LCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImFhbCI6ImFhbDEiLCJhbXIiOlt7Im1ldGhvZCI6InBhc3N3b3JkIiwidGltZXN0YW1wIjoxNzc5MzMxNzIwfV0sInNlc3Npb25faWQiOiJjYmRjOWNjNi00NDdmLTQ5ZTEtOTE1OC0yZmI5Y2YyMDY3YTEiLCJpc19hbm9ueW1vdXMiOmZhbHNlfQ.UwSI4wrF21gw_yYm6fAbMR92nZgCeYcIzxlAKlQUY8EZl5HdAhFrXLobZzCcFmD1pqoBTKiNatB2juo0I_XKsQ
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: Address
+    meta:
+      id: fld_cdc9167e842f4697a739f763106dd4ed
+      created: 1779415784361
+      modified: 1779415784361
+      sortKey: -1779415784361
+      description: ""
+    children:
+      - url: "{{ _.localhost }}/address"
+        name: FindAll
+        meta:
+          id: req_b0e92361cc4e435784d1979c7179f20e
+          created: 1779415790910
+          modified: 1779417008810
+          isPrivate: false
+          description: ""
+          sortKey: -1779415790910
+        method: GET
+        body:
+          mimeType: application/json
+          text: ""
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/12.3.1
+            description: ""
+            disabled: false
+          - name: Authorization
+            value: Bearer {% response 'body', 'req_ac69e3f162b549a6940d1e5e5ce5d72a',
+              'b64::JC50b2tlbg==::46b', 'always', 60 %}
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: ""
+        name: FindByCep
+        meta:
+          id: req_858c18b312694cd3ab34d8a005f0782b
+          created: 1779415815235
+          modified: 1779416812806
+          isPrivate: false
+          description: ""
+          sortKey: -1779415815235
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/12.3.1
+            description: ""
+            disabled: false
+          - name: Authorization
+            value: Bearer {% response 'body', 'req_ac69e3f162b549a6940d1e5e5ce5d72a',
+              'b64::JC50b2tlbg==::46b', 'always', 60 %}
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: ""
+        name: Create
+        meta:
+          id: req_3781b1420d844296979385c34c7705a6
+          created: 1779415832720
+          modified: 1779416864723
+          isPrivate: false
+          description: ""
+          sortKey: -1779415832720
+        method: POST
+        headers:
+          - name: User-Agent
+            value: insomnia/12.3.1
+            description: ""
+            disabled: false
+          - name: Authorization
+            value: Bearer {% response 'body', 'req_ac69e3f162b549a6940d1e5e5ce5d72a',
+              'b64::JC50b2tlbg==::46b', 'always', 60 %}
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: ""
+        name: Update
+        meta:
+          id: req_d04b0097320a4ab18e0ce175bc4c5eba
+          created: 1779416175274
+          modified: 1779416869840
+          isPrivate: false
+          description: ""
+          sortKey: -1779416175274
+        method: PUT
+        headers:
+          - name: User-Agent
+            value: insomnia/12.3.1
+            description: ""
+            disabled: false
+          - name: Authorization
+            value: Bearer {% response 'body', 'req_ac69e3f162b549a6940d1e5e5ce5d72a',
+              'b64::JC50b2tlbg==::46b', 'always', 60 %}
             description: ""
             disabled: false
         settings:
@@ -204,7 +392,7 @@ environments:
   meta:
     id: env_aa031b37e61e4a150c98a033193bf40f10336555
     created: 1779319417271
-    modified: 1779319814264
+    modified: 1779402561668
     isPrivate: false
   data:
     localhost: http://localhost:8080/api

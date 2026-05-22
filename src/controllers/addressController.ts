@@ -56,6 +56,18 @@ class AddressController {
       next(error);
     }
   }
+  
+  async findAll(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { data, error } = await supabase
+        .from("address")
+        .select("*");
+      if (error) throw error;
+      res.status(200).json(data);
+    } catch (error) {
+      next(error);
+    }
+  } 
 }
 
 export const addressController = new AddressController();
