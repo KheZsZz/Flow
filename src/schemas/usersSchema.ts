@@ -9,7 +9,7 @@ export const UserSchema = z.object({
     .transform((val) => val.replace(/\D/g, ""))
     .refine((val) => val.length === 11, {
       message: "CPF deve conter exatamente 11 dígitos numéricos",
-    }),
+    }).optional(),
     
   name_user: z.string()
     .trim()
@@ -78,7 +78,6 @@ export const UserSchema = z.object({
 export const RegisterUserSchema = UserSchema.omit({ 
   id: true, 
   is_active: true, 
-  created_by:true
 });
 
 export const LoginUserSchema = UserSchema.pick({ 

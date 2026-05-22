@@ -1,4 +1,5 @@
 CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA extensions;
+
 CREATE TYPE VehicleType AS ENUM ('Truck','Carreta','Cavalo','Van','Vuc', 'Fiorino');
 CREATE TYPE UserType AS ENUM ('Manager','Admin','Financer','Requestor','Driver','Commum');
 CREATE TYPE OrderType AS ENUM ('Coleta','Entrega','Devolução','Reentrega', 'Avarias');
@@ -14,31 +15,22 @@ CREATE TABLE Address(
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA extensions;
 
 INSERT INTO Address (street, neighborhood, city, state, zip_code) VALUES
 ('Rua Agnaldo Ferreira Lopez, 05', 'Potuvera', 'São Paulo', 'SP', '06852-845'),
 ('Avenida Teste', 'Jardim Botânico', 'Rio de Janeiro', 'RJ', '23456-789'),
 ('Praça Modelo', 'Funcionários', 'Belo Horizonte', 'MG', '34567-890'),
-('Av. Paulista, 1000', 'São Paulo', 'SP', '01310-100'),
-('Rua Augusta, 500', 'São Paulo', 'SP', '01305-000'),
-('Av. das Nações Unidas, 12000', 'São Paulo', 'SP', '04578-000'),
-('Rua Sete de Setembro, 150', 'Rio de Janeiro', 'RJ', '20050-000'),
-('Av. Olegário Maciel, 300', 'Belo Horizonte', 'MG', '30180-110'),
-('Av. Cândido de Abreu, 400', 'Curitiba', 'PR', '80530-000'),
-('Rua dos Andradas, 850', 'Porto Alegre', 'RS', '90020-000'),
-('Av. Agamenon Magalhães, 2500', 'Recife', 'PE', '52010-440'),
-('Av. Santos Dumont, 1200', 'Fortaleza', 'CE', '60150-160'),
-('Av. Anhanguera, 5000', 'Goiânia', 'GO', '74043-010'),
-('SCLN 305 Bloco A, 20', 'Brasília', 'DF', '70737-510');
+('Av. Paulista, 1000', 'Centro','São Paulo', 'SP', '01310-100'),
+('Rua Augusta, 500', 'Centro', 'São Paulo', 'SP', '01305-000');
 
 
 CREATE TABLE Users (
-    id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-    document_user VARCHAR(14) NOT NULL UNIQUE,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name_user VARCHAR(255) NOT NULL,
     email_user VARCHAR(255) NOT NULL UNIQUE,
     password_user VARCHAR(255) NOT NULL,
-    phone VARCHAR(20) NOT NULL,
+    phone_user VARCHAR(20) NOT NULL,
     profile_user UserType NOT NULL DEFAULT 'Commum',
     avatar_url text default 'https://api.dicebear.com/7.x/bottts/svg',
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
@@ -55,29 +47,25 @@ RETURNS trigger AS $$
 BEGIN
   INSERT INTO public.users (
     id,
-    document_user,
     name_user,
     email_user,
     password_user,
-    phone_user, 
-    profile_user, 
+    phone_user,
+    profile_user,
     avatar_url,
     is_active,
-    corporation_id,
-    created_by 
+    created_by
   )
   VALUES (
     new.id,
-    COALESCE(new.raw_user_meta_data->>'document_user', '00000000000'),
     COALESCE(new.raw_user_meta_data->>'name_user', 'Usuário Novo'),
     new.email,
     'managed_by_auth',
-    COALESCE(new.raw_user_meta_data->>'phone', '00000000000'),
-    (COALESCE(new.raw_user_meta_data->>'profile', 'Commum'))::UserType,
+    COALESCE(new.raw_user_meta_data->>'phone_user', '(00) 0.0000-0000'),
+    (COALESCE(new.raw_user_meta_data->>'profile_user', 'Commum'))::UserType,
     COALESCE(new.raw_user_meta_data->>'avatar_url', 'https://api.dicebear.com/7.x/bottts/svg'),
     TRUE,
-    (new.raw_user_meta_data->>'corporation_id')::UUID,
-    (COALESCE(new.raw_user_meta_data->>'created_by', new.id::text))::UUID 
+    NULL  
   );
   RETURN new;
 END;
@@ -104,7 +92,7 @@ VALUES (
   extensions.crypt('IsaKev@10', extensions.gen_salt('bf')), 
   now(), 
   '{"provider":"email","providers":["email"]}', 
-  '{"name_user":"Kevin Oliveira","profile_user":"Manager", "phone":"(11) 9.9577-8573", "document_user":"238.610.668-31"}', 
+  '{"name_user":"Kevin Oliveira","profile_user":"Manager", "phone_user":"(11) 9.9577-8573", "document_user":"238.610.668-31"}', 
   True, 
   now(),    
   now(), 
@@ -127,7 +115,7 @@ VALUES (
   extensions.crypt('IsaKev@10', extensions.gen_salt('bf')), 
   now(), 
   '{"provider":"email","providers":["email"]}', 
-  '{"name_user":"Milena Reis","profile_user":"Common", "phone":"(11) 9.9577-8572", "document_user":"238.610.668-32"}', 
+  '{"name_user":"Milena Reis","profile_user":"Commum", "phone":"(11) 9.9577-8572", "document_user":"238.610.668-32"}', 
   False, 
   now(),    
   now(), 
@@ -150,7 +138,7 @@ VALUES (
   extensions.crypt('IsaKev@10', extensions.gen_salt('bf')), 
   now(), 
   '{"provider":"email","providers":["email"]}', 
-  '{"name_user":"Thamyres Doc","profile_user":"Requestor", "phone":"(11) 9.9577-8571", "document_user":"238.610.668-33"}', 
+  '{"name_user":"Thamyres Doc","profile_user":"Requestor", "phone_user":"(11) 9.9577-8571", "document_user":"238.610.668-33"}', 
   False, 
   now(),    
   now(), 
@@ -173,7 +161,7 @@ VALUES (
   extensions.crypt('IsaKev@10', extensions.gen_salt('bf')), 
   now(), 
   '{"provider":"email","providers":["email"]}', 
-  '{"name_user":"Edson Barbosa","profile_user":"Financer", "phone":"(11) 9.9577-8569", "document_user":"238.610.668-30"}', 
+  '{"name_user":"Edson Barbosa","profile_user":"Financer", "phone_user":"(11) 9.9577-8569", "document_user":"238.610.668-30"}', 
   False, 
   now(),    
   now(), 
@@ -196,7 +184,7 @@ VALUES (
   extensions.crypt('IsaKev@10', extensions.gen_salt('bf')), 
   now(), 
   '{"provider":"email","providers":["email"]}', 
-  '{"name_user":"Cesar Filho","profile_user":"Driver", "phone":"(11) 9.9577-8540", "document_user":"138.610.668-34"}', 
+  '{"name_user":"Cesar Filho","profile_user":"Driver", "phone_user":"(11) 9.9577-8540", "document_user":"138.610.668-34"}', 
   False, 
   now(),    
   now(), 
@@ -216,7 +204,7 @@ CREATE TABLE Corporation (
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
 
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX idx_corporation_cnpj ON Corporation(cnpj);
@@ -229,8 +217,6 @@ INSERT INTO Corporation (name, cnpj, address_id, phone, logo_url, is_active) VAL
     'https://www.transportesflow.com.br/lovable-uploads/181905e7-a700-4785-b4c7-181b13e7b387.png', 
     TRUE
 );
-
-ALTER TABLE Corporation ADD CONSTRAINT fk_corporation_created_by FOREIGN KEY (created_by) REFERENCES Users(id) ON DELETE CASCADE;
 
 
 CREATE TABLE CorporationUsers (
@@ -289,13 +275,13 @@ CREATE TABLE Vehicles (
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
 
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 CREATE INDEX idx_vehicles_license_plate ON Vehicles(license_plate);
 
-INSERT INTO Vehicles (make, model, year, type, license_plate, is_active, created_by) VALUES
+INSERT INTO Vehicles (make, model, year, type, license_plate, is_active) VALUES
 ('Volvo', 'FH16', 2020, 'Cavalo', 'ABC1234', TRUE),
-('Scania', 'R500', 2019, 'carreta', 'DEF5678', TRUE),
+('Scania', 'R500', 2019, 'Carreta', 'DEF5678', TRUE),
 ('Mercedes-Benz', 'Actros', 2021, 'Cavalo', 'GHI9012', TRUE),
 ('Ford', 'Cargo 2429', 2018, 'Truck', 'JKL3456', TRUE), 
 ('Volkswagen', 'Constellation 24.280', 2017, 'Truck', 'MNO7890', TRUE),

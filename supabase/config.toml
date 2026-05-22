@@ -1,1 +1,4 @@
 project_id = "flow"
+
+[auth.email]
+enable_confirmations = false
