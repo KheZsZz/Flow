@@ -4,14 +4,14 @@ name: Flow
 meta:
   id: wrk_52f3d3fb904c4010ba17b630d785420a
   created: 1779319417260
-  modified: 1779319417260
+  modified: 1779387809891
   description: ""
 collection:
   - name: Users
     meta:
       id: fld_f79a68a7b56844da824d0e9bbf7d523e
       created: 1779319461527
-      modified: 1779319461527
+      modified: 1779541804682
       sortKey: -1779319461527
       description: ""
     children:
@@ -20,7 +20,7 @@ collection:
         meta:
           id: req_0973c105af6d49f18fe463f1d175e2a1
           created: 1779319466896
-          modified: 1779412154952
+          modified: 1779535940704
           isPrivate: false
           description: ""
           sortKey: -1779319471160
@@ -51,7 +51,7 @@ collection:
         meta:
           id: req_54d3639766c34d4cba88dd8a20dcb0f0
           created: 1779319496425
-          modified: 1779410572921
+          modified: 1779545457920
           isPrivate: false
           description: ""
           sortKey: -1779319496425
@@ -60,11 +60,11 @@ collection:
           mimeType: application/json
           text: |-
             {
-              "name_user": "Teste User",
-              "email_user": "teste2@flow.com.br",
+              "name_user": "Driver Teste",
+              "email_user": "driver2@flow.com.br",
               "password_user": "FlowTeste@2A",
-              "phone_user": "(11) 9.9999-0000",
-              "profile_user": "Commum"
+              "phone_user": "(11) 9.9000-0000",
+              "profile_user": "Driver"
             }
         headers:
           - name: Content-Type
@@ -95,7 +95,7 @@ collection:
         meta:
           id: req_5a9ce29364cc4728b26482a662127063
           created: 1779319510476
-          modified: 1779415210880
+          modified: 1779535940704
           isPrivate: false
           description: ""
           sortKey: -1779319510476
@@ -134,16 +134,16 @@ collection:
             send: true
             store: true
           rebuildPath: true
-      - url: "{{ _.localhost }}/users/7eb5f886-327f-46f8-9394-482a46fcd6a9"
-        name: Delete
+      - url: "{{ _.localhost }}/users/4a0dd7a4-9535-4101-8c34-c28260ad48e8"
+        name: desactive
         meta:
           id: req_4e6acdb3818b41e7a1c6ee3097266457
           created: 1779319521069
-          modified: 1779415618741
+          modified: 1779545144580
           isPrivate: false
           description: ""
           sortKey: -1779319521069
-        method: DELETE
+        method: PATCH
         headers:
           - name: User-Agent
             value: insomnia/12.3.1
@@ -167,7 +167,7 @@ collection:
         meta:
           id: req_5dbce5986ca74c1dafcee49b95bd6550
           created: 1779319532639
-          modified: 1779415704181
+          modified: 1779535940704
           isPrivate: false
           description: ""
           sortKey: -1779319532639
@@ -190,11 +190,103 @@ collection:
             send: true
             store: true
           rebuildPath: true
+      - url: "{{ _.localhost }}/users/4a0dd7a4-9535-4101-8c34-c28260ad48e8"
+        name: Delete user
+        meta:
+          id: req_3333deb584284b0e8c1c4897faa2acbd
+          created: 1779545147468
+          modified: 1779545252724
+          isPrivate: false
+          description: ""
+          sortKey: -1779545147468
+        method: DELETE
+        headers:
+          - name: User-Agent
+            value: insomnia/12.6.0
+            description: ""
+            disabled: false
+          - name: Authorization
+            value: Bearer {% response 'body', 'req_ac69e3f162b549a6940d1e5e5ce5d72a',
+              'b64::JC50b2tlbg==::46b', 'always', 60 %}
+            description: ""
+            disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - name: Drives
+        meta:
+          id: fld_0602071b24e44fc28337b0f068b47d40
+          created: 1779541814652
+          modified: 1779545255876
+          sortKey: -1779545147568
+          description: ""
+        children:
+          - url: "{{ _.localhost }}/drivers"
+            name: FindAll
+            meta:
+              id: req_9a8d1587c2f44dd88dea9d37d6ad1672
+              created: 1779541821598
+              modified: 1779545495999
+              isPrivate: false
+              description: ""
+              sortKey: -1779541821598
+            method: GET
+            headers:
+              - name: User-Agent
+                value: insomnia/12.6.0
+                description: ""
+                disabled: false
+              - name: Authorization
+                value: Bearer {% response 'body', 'req_ac69e3f162b549a6940d1e5e5ce5d72a',
+                  'b64::JC50b2tlbg==::46b', 'always', 60 %}
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "{{ _.localhost }}/drivers/"
+            name: FindById
+            meta:
+              id: req_1300d64732b8494b841eaa382fbc1ddd
+              created: 1779541832360
+              modified: 1779543931566
+              isPrivate: false
+              description: ""
+              sortKey: -1779541832360
+            method: GET
+            headers:
+              - name: User-Agent
+                value: insomnia/12.6.0
+                description: ""
+                disabled: false
+              - name: Authorization
+                value: Bearer {% response 'body', 'req_ac69e3f162b549a6940d1e5e5ce5d72a',
+                  'b64::JC50b2tlbg==::46b', 'always', 60 %}
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
   - name: Auth
     meta:
       id: fld_a7196d0680424f189147284dffe2ee31
       created: 1779319940838
-      modified: 1779319940838
+      modified: 1779535940704
       sortKey: -1779319940838
       description: ""
     children:
@@ -203,7 +295,7 @@ collection:
         meta:
           id: req_ac69e3f162b549a6940d1e5e5ce5d72a
           created: 1779319944469
-          modified: 1779402600001
+          modified: 1779543903122
           isPrivate: false
           description: ""
           sortKey: -1779319944469
@@ -235,7 +327,7 @@ collection:
         meta:
           id: req_2320b8d7c0674e76940caa21034fbca1
           created: 1779319966043
-          modified: 1779331740150
+          modified: 1779535940704
           isPrivate: false
           description: ""
           sortKey: -1779319966043
@@ -260,7 +352,7 @@ collection:
     meta:
       id: fld_cdc9167e842f4697a739f763106dd4ed
       created: 1779415784361
-      modified: 1779415784361
+      modified: 1779535940704
       sortKey: -1779415784361
       description: ""
     children:
@@ -269,17 +361,12 @@ collection:
         meta:
           id: req_b0e92361cc4e435784d1979c7179f20e
           created: 1779415790910
-          modified: 1779417008810
+          modified: 1779536834114
           isPrivate: false
           description: ""
           sortKey: -1779415790910
         method: GET
-        body:
-          mimeType: application/json
-          text: ""
         headers:
-          - name: Content-Type
-            value: application/json
           - name: User-Agent
             value: insomnia/12.3.1
             description: ""
@@ -297,12 +384,12 @@ collection:
             send: true
             store: true
           rebuildPath: true
-      - url: ""
+      - url: "{{ _.localhost }}/address/06852845"
         name: FindByCep
         meta:
           id: req_858c18b312694cd3ab34d8a005f0782b
           created: 1779415815235
-          modified: 1779416812806
+          modified: 1779547024843
           isPrivate: false
           description: ""
           sortKey: -1779415815235
@@ -313,8 +400,7 @@ collection:
             description: ""
             disabled: false
           - name: Authorization
-            value: Bearer {% response 'body', 'req_ac69e3f162b549a6940d1e5e5ce5d72a',
-              'b64::JC50b2tlbg==::46b', 'always', 60 %}
+            value: "{{ _.token }}"
             description: ""
             disabled: false
         settings:
@@ -330,7 +416,7 @@ collection:
         meta:
           id: req_3781b1420d844296979385c34c7705a6
           created: 1779415832720
-          modified: 1779416864723
+          modified: 1779546218713
           isPrivate: false
           description: ""
           sortKey: -1779415832720
@@ -341,8 +427,7 @@ collection:
             description: ""
             disabled: false
           - name: Authorization
-            value: Bearer {% response 'body', 'req_ac69e3f162b549a6940d1e5e5ce5d72a',
-              'b64::JC50b2tlbg==::46b', 'always', 60 %}
+            value: "{{ _.token }}"
             description: ""
             disabled: false
         settings:
@@ -358,7 +443,7 @@ collection:
         meta:
           id: req_d04b0097320a4ab18e0ce175bc4c5eba
           created: 1779416175274
-          modified: 1779416869840
+          modified: 1779546228961
           isPrivate: false
           description: ""
           sortKey: -1779416175274
@@ -369,8 +454,7 @@ collection:
             description: ""
             disabled: false
           - name: Authorization
-            value: Bearer {% response 'body', 'req_ac69e3f162b549a6940d1e5e5ce5d72a',
-              'b64::JC50b2tlbg==::46b', 'always', 60 %}
+            value: "{{ _.token }}"
             description: ""
             disabled: false
         settings:
@@ -381,18 +465,27 @@ collection:
             send: true
             store: true
           rebuildPath: true
+  - name: Vehicles
+    meta:
+      id: fld_2be9dc82db1545b79b0bd844821c3669
+      created: 1779545830055
+      modified: 1779545830055
+      sortKey: -1779545830055
+      description: ""
 cookieJar:
   name: Default Jar
   meta:
     id: jar_aa031b37e61e4a150c98a033193bf40f10336555
-    created: 1779319417282
-    modified: 1779319417282
+    created: 1779387809965
+    modified: 1779387809965
 environments:
   name: Base Environment
   meta:
     id: env_aa031b37e61e4a150c98a033193bf40f10336555
     created: 1779319417271
-    modified: 1779402561668
+    modified: 1779546005375
     isPrivate: false
   data:
     localhost: http://localhost:8080/api
+    token: Bearer {% response 'body', 'req_ac69e3f162b549a6940d1e5e5ce5d72a',
+      'b64::JC50b2tlbg==::46b', 'always', 60 %}
