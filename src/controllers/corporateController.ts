@@ -9,7 +9,7 @@ class CorporateController {
     const { name, cnpj, phone, logo_url, manager_id }: coporateType = CoporateSchema.parse(req.body);
 
     const { data, error } = await supabase
-      .from("corporates")
+      .from("corporation")
       .insert({
         name,
         cnpj,
@@ -27,7 +27,7 @@ class CorporateController {
   async update(req: AuthRequest, res: Response, next: NextFunction) {
     const { name, cnpj, phone, logo_url }: coporateType = CoporateSchema.parse(req.body);
     const { data, error } = await supabase
-      .from("corporates")
+      .from("corporation")
       .update({
         name,
         cnpj,
@@ -43,7 +43,7 @@ class CorporateController {
 
   async findById(req: AuthRequest, res: Response, next: NextFunction) {
     const { data, error } = await supabase
-      .from("corporates")
+      .from("corporation")
       .select("*")
       .eq("id", req.company?.id)
       .single();
