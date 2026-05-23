@@ -5,7 +5,7 @@
   "main": "src/server.ts",
   "scripts": {
     "dev": "cross-env AMBIENT_PERFIL_ENV=development nodemon -r tsconfig-paths/register src/server.ts",
-    "production": "cross-env AMBIENT_PERFIL_ENV=production nodemon -r tsconfig-paths/register src/server.ts",
+    "prod": "cross-env AMBIENT_PERFIL_ENV=production nodemon -r tsconfig-paths/register src/server.ts",
     "build": "tsc",
     "start": "node -r tsconfig-paths/register dist/server.js"
   },
