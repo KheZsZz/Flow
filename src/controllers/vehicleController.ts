@@ -1,110 +1,42 @@
-import { Request, Response, NextFunction } from "express";
+import { Response, NextFunction } from "express";
 import { AuthRequest } from "@/middleware/auth";
-import { supabase } from "@/config/supabase";
-import { vehicleSchema, vehicleOwnerSchema, VehicleType } from "@/schemas/vehicleSchema";
+import { supabase, supabaseAdmin } from "@/config/supabase";
+import { vehicleSchema, VehicleType } from "@/schemas/vehicleSchema";
 
 class VehicleController {
   async create(req: AuthRequest, res: Response, next: NextFunction) {
-    const { make, model, year, type, license_plate, is_active } = vehicleSchema.parse(req.body);
-
-    if (!req.company?.id || !req.user?.id) {
-      return res
-        .status(400)
-        .json({ error: "Missing company or user context in request" });
-    }
-
     try {
-      const { data: newVehicle, error: vehicleError } = await supabase
+      const { make, model, year, type, license_plate, is_active } =
+        vehicleSchema.parse(req.body);
+
+      if (!req.company?.id || !req.user?.id) {
+        return res.status(403).json({ error: "Company context not found in request" });
+      }
+
+      const { data: newVehicle, error: vehicleError } = await supabaseAdmin
         .from("vehicles")
-        .insert({
-          make,
-          model,
-          year,
-          type,
-          license_plate,
-          is_active,
-          created_by: req.user?.id,
-        })
+        .insert({ make, model, year, type, license_plate, is_active })
         .select("id")
         .single();
 
       if (vehicleError) throw vehicleError;
 
-      const vehicleId = newVehicle.id;
-      const { error: ownerError } = await supabase
-        .from("VehicleOwners")
+      const { error: ownerError } = await supabaseAdmin
+        .from("vehicleowners")
         .insert({
-          corporation_id: req.company?.id,
-          vehicle_id: vehicleId,
-          created_by: req.user?.id,
+          corporation_id: req.company.id,
+          vehicle_id: newVehicle.id,
+          created_by: req.user.id,
         });
 
       if (ownerError) {
-        await supabase.from("vehicles").delete().eq("id", vehicleId);
+        await supabaseAdmin.from("vehicles").delete().eq("id", newVehicle.id);
         throw ownerError;
       }
 
       return res.status(201).json({
-        message: "Vehicle created and linked to corporation successfully",
-        vehicleId,
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  async update(req: AuthRequest, res: Response, next: NextFunction) {
-    try {
-      const { id } = req.params;
-      const {
-        make,
-        model,
-        year,
-        type,
-        license_plate,
-        is_active,
-      }: VehicleType = vehicleSchema.parse(req.body);
-
-      const { data: updatedVehicle, error: updateError } = await supabase
-        .from("vehicles")
-        .update({
-          make,
-          model,
-          year,
-          type,
-          license_plate,
-          is_active,
-        })
-        .eq("id", id)
-        .select("id")
-        .single();
-
-      if (updateError) throw updateError;
-
-      return res.status(200).json({
-        message: "Vehicle updated successfully",
-        vehicleId: updatedVehicle.id,
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  async delete(req: AuthRequest, res: Response, next: NextFunction) {
-    try {
-      const { id } = req.params;
-      const { data: deletedVehicle, error: deleteError } = await supabase
-        .from("vehicles")
-        .delete()
-        .eq("id", id)
-        .select("id")
-        .single();
-
-      if (deleteError) throw deleteError;
-
-      return res.status(200).json({
-        message: "Vehicle deleted successfully",
-        vehicleId: deletedVehicle.id,
+        message: "Vehicle created successfully",
+        data: { id: newVehicle.id },
       });
     } catch (error) {
       next(error);
@@ -113,37 +45,30 @@ class VehicleController {
 
   async findAll(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const companyId = req.company?.id;
-
-      if (!companyId) {
-        return res
-          .status(400)
-          .json({ error: "Company context not found in request" });
+      if (!req.company?.id) {
+        return res.status(403).json({ error: "Company context not found in request" });
       }
 
-      const { data: ownersData, error: findError } = await supabase
-        .from("VehicleOwners")
-        .select(
-          `
-          corporation_id,
+      const { data, error } = await supabaseAdmin
+        .from("vehicleowners")
+        .select(`
           vehicles!vehicle_id (
             id,
-            license_plate,
-            type,
-            model,
             make,
+            model,
             year,
+            type,
+            license_plate,
             is_active
           )
-        `,
-        )
-        .eq("corporation_id", companyId);
+        `)
+        .eq("corporation_id", req.company.id);
 
-      if (findError) throw findError;
+      if (error) throw error;
 
-      const vehicles = ownersData
-        .map((item) => item.vehicles)
-        .filter((vehicle) => vehicle !== null);
+      const vehicles = data
+        .map((row) => (row as any).vehicles)
+        .filter((v) => v !== null);
 
       return res.status(200).json(vehicles);
     } catch (error) {
@@ -154,44 +79,141 @@ class VehicleController {
   async findById(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const companyId = req.company?.id;
 
-      if (!companyId) {
-        return res
-          .status(400)
-          .json({ error: "Company context not found in request" });
+      if (!req.company?.id) {
+        return res.status(403).json({ error: "Company context not found in request" });
       }
 
-      const { data: ownersData, error: findError } = await supabase
-        .from("VehicleOwners")
-        .select(
-          `
-          corporation_id,
+      const { data, error } = await supabaseAdmin
+        .from("vehicleowners")
+        .select(`
           vehicles!vehicle_id (
             id,
-            license_plate,
-            type,
-            model,
             make,
+            model,
             year,
+            type,
+            license_plate,
             is_active
           )
-        `,
-        )
-        .eq("corporation_id", companyId)
-        .eq("vehicles.id", id);
+        `)
+        .eq("corporation_id", req.company.id)
+        .eq("vehicle_id", id)
+        .single();
 
-      if (findError) throw findError;
+      if (error) throw error;
 
-      const vehicle = ownersData
-        .map((item) => item.vehicles)
-        .filter((vehicle) => vehicle !== null)[0];
+      const vehicle = (data as any).vehicles;
 
       if (!vehicle) {
-        return res.status(404).json({ error: "Vehicle not found" });
+        return res.status(404).json({ error: "Vehicle not found in your corporation" });
       }
 
       return res.status(200).json(vehicle);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+
+  async update(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+
+      if (!req.company?.id) {
+        return res.status(403).json({ error: "Company context not found in request" });
+      }
+
+      const { data: owner, error: ownerError } = await supabaseAdmin
+        .from("vehicleowners")
+        .select("vehicle_id")
+        .eq("vehicle_id", id)
+        .eq("corporation_id", req.company.id)
+        .single();
+
+      if (ownerError || !owner) {
+        return res.status(403).json({ error: "Vehicle does not belong to your corporation" });
+      }
+
+      const { make, model, year, type, license_plate, is_active }: VehicleType =
+        vehicleSchema.parse(req.body);
+
+      const { data, error } = await supabaseAdmin
+        .from("vehicles")
+        .update({ make, model, year, type, license_plate, is_active })
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      return res.status(200).json({ message: "Vehicle updated successfully", data });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async disable(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+
+      if (!req.company?.id) {
+        return res.status(403).json({ error: "Company context not found in request" });
+      }
+
+      const { data: owner, error: ownerError } = await supabaseAdmin
+        .from("vehicleowners")
+        .select("vehicle_id")
+        .eq("vehicle_id", id)
+        .eq("corporation_id", req.company.id)
+        .single();
+
+      if (ownerError || !owner) {
+        return res.status(403).json({ error: "Vehicle does not belong to your corporation" });
+      }
+
+      const { data, error } = await supabaseAdmin
+        .from("vehicles")
+        .update({ is_active: false })
+        .eq("id", id)
+        .select("id, license_plate, is_active")
+        .single();
+
+      if (error) throw error;
+
+      return res.status(200).json({ message: "Vehicle disabled successfully", data });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async delete(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+
+      if (!req.company?.id) {
+        return res.status(403).json({ error: "Company context not found in request" });
+      }
+
+      const { data: owner, error: ownerError } = await supabaseAdmin
+        .from("vehicleowners")
+        .select("vehicle_id")
+        .eq("vehicle_id", id)
+        .eq("corporation_id", req.company.id)
+        .single();
+
+      if (ownerError || !owner) {
+        return res.status(403).json({ error: "Vehicle does not belong to your corporation" });
+      }
+
+      const { error } = await supabaseAdmin
+        .from("vehicles")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+
+      return res.status(200).json({ message: "Vehicle deleted successfully" });
     } catch (error) {
       next(error);
     }
