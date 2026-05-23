@@ -25,6 +25,10 @@ class AuthMiddleware {
   async authUser(req: AuthRequest, res: Response, next: NextFunction) {
     const authHeader = req.headers.authorization;
     const token = authHeader?.split(" ")[1];
+
+    // console.log("authHeader:", authHeader ? "presente" : "ausente");
+    // console.log("token:", token ? token.substring(0, 20) + "..." : "ausente");
+
     if (!token) return res.status(401).json({ error: "Token not provided" });
 
     const {
@@ -52,18 +56,13 @@ class AuthMiddleware {
 
       const { data, error } = await supabase
         .from("corporationusers")
-        .select(`
-          corporation_id,
-          corporation (
-            id,
-            name,
-            logo_url,
-            is_active
-          )
-        `)
+        .select("corporation_id, corporation:corporation_id ( id, name, logo_url, is_active )")
         .eq("manager_id", userId)
         .single();
 
+      // console.log("data:", JSON.stringify(data));
+      // console.log("error:", JSON.stringify(error));
+      
       if (error || !data) {
         return res
           .status(403)
