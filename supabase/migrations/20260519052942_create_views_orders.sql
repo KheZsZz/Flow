@@ -1,9 +1,9 @@
 CREATE OR REPLACE FUNCTION get_company_order_counters(p_corporation_id UUID)
-RETURNS TABLE (status_code VARCHAR, total BIGINT) 
+RETURNS TABLE (status_code VARCHAR, total BIGINT)
 LANGUAGE plpgsql AS $$
 BEGIN
     RETURN QUERY
-    SELECT 
+    SELECT
         s.code AS status_code,
         COUNT(oi.id) AS total
     FROM OrderItem oi

@@ -6,7 +6,8 @@ import { AuthRequest } from "@/middleware/auth";
 // Endereço no cadastro ainda não integrado.
 class CorporateController {
   async create(req: AuthRequest, res: Response, next: NextFunction) {
-    const { name, cnpj, phone, logo_url, manager_id }: coporateType = CoporateSchema.parse(req.body);
+    const { name, cnpj, phone, logo_url, manager_id }: coporateType =
+      CoporateSchema.parse(req.body);
 
     const { data, error } = await supabase
       .from("corporation")
@@ -23,9 +24,10 @@ class CorporateController {
     if (error) throw error;
     res.status(201).json({ message: "Corporate created successfully", data });
   }
-
   async update(req: AuthRequest, res: Response, next: NextFunction) {
-    const { name, cnpj, phone, logo_url }: coporateType = CoporateSchema.parse(req.body);
+    const { name, cnpj, phone, logo_url }: coporateType = CoporateSchema.parse(
+      req.body,
+    );
     const { data, error } = await supabase
       .from("corporation")
       .update({
@@ -40,7 +42,6 @@ class CorporateController {
     if (error) throw error;
     res.status(200).json({ message: "Corporate updated successfully", data });
   }
-
   async findById(req: AuthRequest, res: Response, next: NextFunction) {
     const { data, error } = await supabase
       .from("corporation")

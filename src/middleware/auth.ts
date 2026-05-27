@@ -56,13 +56,15 @@ class AuthMiddleware {
 
       const { data, error } = await supabase
         .from("corporationusers")
-        .select("corporation_id, corporation:corporation_id ( id, name, logo_url, is_active )")
+        .select(
+          "corporation_id, corporation:corporation_id ( id, name, logo_url, is_active )",
+        )
         .eq("manager_id", userId)
         .single();
 
       // console.log("data:", JSON.stringify(data));
       // console.log("error:", JSON.stringify(error));
-      
+
       if (error || !data) {
         return res
           .status(403)
@@ -108,7 +110,7 @@ class AuthMiddleware {
       }
 
       const minRequired = Math.min(
-        ...allowedRoles.map((r) => ROLE_HIERARCHY[r] ?? 0)
+        ...allowedRoles.map((r) => ROLE_HIERARCHY[r] ?? 0),
       );
 
       if (ROLE_HIERARCHY[profile] >= minRequired) {

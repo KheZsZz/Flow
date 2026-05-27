@@ -3,6 +3,7 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA extensions;
 CREATE TYPE VehicleType AS ENUM ('Truck','Carreta','Cavalo','Van','Vuc', 'Fiorino');
 CREATE TYPE UserType AS ENUM ('Manager','Admin','Financer','Requestor','Driver','Commum');
 CREATE TYPE OrderType AS ENUM ('Coleta','Entrega','Devolução','Reentrega', 'Avarias');
+CREATE TYPE FuelType AS ENUM ('Diesel O500', 'Gasolina aditivada', 'Etanol', 'Diesel S10', 'Gasolina Comum');
 
 CREATE TABLE Address(
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -77,123 +78,123 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
-CREATE TRIGGER on_auth_user_created 
-  AFTER INSERT ON auth.users 
-  FOR EACH ROW 
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW
   EXECUTE PROCEDURE public.handle_new_user();
 
 
 INSERT INTO auth.users (
-  instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, 
-  raw_app_meta_data, raw_user_meta_data, is_super_admin, created_at, updated_at, 
+  instance_id, id, aud, role, email, encrypted_password, email_confirmed_at,
+  raw_app_meta_data, raw_user_meta_data, is_super_admin, created_at, updated_at,
   last_sign_in_at, confirmation_token, recovery_token, email_change_token_new, email_change
-) 
+)
 VALUES (
   '00000000-0000-0000-0000-000000000000',
-  extensions.gen_random_uuid(), 
-  'authenticated', 
-  'authenticated', 
-  'kevinklgvg@gmail.com', 
-  extensions.crypt('IsaKev@10', extensions.gen_salt('bf')), 
-  now(), 
-  '{"provider":"email","providers":["email"]}', 
-  '{"name_user":"Kevin Oliveira","profile_user":"Manager", "phone_user":"(11) 9.9577-8573", "document_user":"238.610.668-31"}', 
-  True, 
-  now(),    
-  now(), 
-  now(), 
+  extensions.gen_random_uuid(),
+  'authenticated',
+  'authenticated',
+  'kevinklgvg@gmail.com',
+  extensions.crypt('IsaKev@10', extensions.gen_salt('bf')),
+  now(),
+  '{"provider":"email","providers":["email"]}',
+  '{"name_user":"Kevin Oliveira","profile_user":"Manager", "phone_user":"(11) 9.9577-8573", "document_user":"238.610.668-31"}',
+  True,
+  now(),
+  now(),
+  now(),
   '', '', '', ''
 );
 
 
 INSERT INTO auth.users (
-  instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, 
-  raw_app_meta_data, raw_user_meta_data, is_super_admin, created_at, updated_at, 
+  instance_id, id, aud, role, email, encrypted_password, email_confirmed_at,
+  raw_app_meta_data, raw_user_meta_data, is_super_admin, created_at, updated_at,
   last_sign_in_at, confirmation_token, recovery_token, email_change_token_new, email_change
-) 
+)
 VALUES (
   '00000000-0000-0000-0000-000000000000',
-  extensions.gen_random_uuid(), 
-  'authenticated', 
-  'authenticated', 
-  'milena.reis@flow.com.br', 
-  extensions.crypt('IsaKev@10', extensions.gen_salt('bf')), 
-  now(), 
-  '{"provider":"email","providers":["email"]}', 
-  '{"name_user":"Milena Reis","profile_user":"Commum", "phone":"(11) 9.9577-8572", "document_user":"238.610.668-32"}', 
-  False, 
-  now(),    
-  now(), 
-  now(), 
+  extensions.gen_random_uuid(),
+  'authenticated',
+  'authenticated',
+  'milena.reis@flow.com.br',
+  extensions.crypt('IsaKev@10', extensions.gen_salt('bf')),
+  now(),
+  '{"provider":"email","providers":["email"]}',
+  '{"name_user":"Milena Reis","profile_user":"Commum", "phone":"(11) 9.9577-8572", "document_user":"238.610.668-32"}',
+  False,
+  now(),
+  now(),
+  now(),
   '', '', '', ''
 );
 
 
 INSERT INTO auth.users (
-  instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, 
-  raw_app_meta_data, raw_user_meta_data, is_super_admin, created_at, updated_at, 
+  instance_id, id, aud, role, email, encrypted_password, email_confirmed_at,
+  raw_app_meta_data, raw_user_meta_data, is_super_admin, created_at, updated_at,
   last_sign_in_at, confirmation_token, recovery_token, email_change_token_new, email_change
-) 
+)
 VALUES (
   '00000000-0000-0000-0000-000000000000',
-  extensions.gen_random_uuid(), 
-  'authenticated', 
-  'authenticated', 
-  'thamyres.doc@flow.com.br', 
-  extensions.crypt('IsaKev@10', extensions.gen_salt('bf')), 
-  now(), 
-  '{"provider":"email","providers":["email"]}', 
-  '{"name_user":"Thamyres Doc","profile_user":"Requestor", "phone_user":"(11) 9.9577-8571", "document_user":"238.610.668-33"}', 
-  False, 
-  now(),    
-  now(), 
-  now(), 
+  extensions.gen_random_uuid(),
+  'authenticated',
+  'authenticated',
+  'thamyres.doc@flow.com.br',
+  extensions.crypt('IsaKev@10', extensions.gen_salt('bf')),
+  now(),
+  '{"provider":"email","providers":["email"]}',
+  '{"name_user":"Thamyres Doc","profile_user":"Requestor", "phone_user":"(11) 9.9577-8571", "document_user":"238.610.668-33"}',
+  False,
+  now(),
+  now(),
+  now(),
   '', '', '', ''
 );
 
 
 INSERT INTO auth.users (
-  instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, 
-  raw_app_meta_data, raw_user_meta_data, is_super_admin, created_at, updated_at, 
+  instance_id, id, aud, role, email, encrypted_password, email_confirmed_at,
+  raw_app_meta_data, raw_user_meta_data, is_super_admin, created_at, updated_at,
   last_sign_in_at, confirmation_token, recovery_token, email_change_token_new, email_change
-) 
+)
 VALUES (
   '00000000-0000-0000-0000-000000000000',
-  extensions.gen_random_uuid(), 
-  'authenticated', 
-  'authenticated', 
-  'edson.barbosa@flow.com.br', 
-  extensions.crypt('IsaKev@10', extensions.gen_salt('bf')), 
-  now(), 
-  '{"provider":"email","providers":["email"]}', 
-  '{"name_user":"Edson Barbosa","profile_user":"Financer", "phone_user":"(11) 9.9577-8569", "document_user":"238.610.668-30"}', 
-  False, 
-  now(),    
-  now(), 
-  now(), 
+  extensions.gen_random_uuid(),
+  'authenticated',
+  'authenticated',
+  'edson.barbosa@flow.com.br',
+  extensions.crypt('IsaKev@10', extensions.gen_salt('bf')),
+  now(),
+  '{"provider":"email","providers":["email"]}',
+  '{"name_user":"Edson Barbosa","profile_user":"Financer", "phone_user":"(11) 9.9577-8569", "document_user":"238.610.668-30"}',
+  False,
+  now(),
+  now(),
+  now(),
   '', '', '', ''
 );
 
 
 INSERT INTO auth.users (
-  instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, 
-  raw_app_meta_data, raw_user_meta_data, is_super_admin, created_at, updated_at, 
+  instance_id, id, aud, role, email, encrypted_password, email_confirmed_at,
+  raw_app_meta_data, raw_user_meta_data, is_super_admin, created_at, updated_at,
   last_sign_in_at, confirmation_token, recovery_token, email_change_token_new, email_change
-) 
+)
 VALUES (
   '00000000-0000-0000-0000-000000000000',
-  extensions.gen_random_uuid(), 
-  'authenticated', 
-  'authenticated', 
-  'cesar.filho@flow.com.br', 
-  extensions.crypt('IsaKev@10', extensions.gen_salt('bf')), 
-  now(), 
-  '{"provider":"email","providers":["email"]}', 
-  '{"name_user":"Cesar Filho","profile_user":"Driver", "phone_user":"(11) 9.9577-8540", "document_user":"138.610.668-34"}', 
-  False, 
-  now(),    
-  now(), 
-  now(), 
+  extensions.gen_random_uuid(),
+  'authenticated',
+  'authenticated',
+  'cesar.filho@flow.com.br',
+  extensions.crypt('IsaKev@10', extensions.gen_salt('bf')),
+  now(),
+  '{"provider":"email","providers":["email"]}',
+  '{"name_user":"Cesar Filho","profile_user":"Driver", "phone_user":"(11) 9.9577-8540", "document_user":"138.610.668-34"}',
+  False,
+  now(),
+  now(),
+  now(),
   '', '', '', ''
 );
 
@@ -215,11 +216,11 @@ CREATE TABLE Corporation (
 CREATE INDEX idx_corporation_cnpj ON Corporation(cnpj);
 
 INSERT INTO Corporation (name, cnpj, address_id, phone, logo_url, is_active) VALUES(
-    'Flow Transportes', 
-    '12.345.678/0001-99', 
-    (SELECT id FROM Address WHERE zip_code = '06852-845' LIMIT 1), 
-    '(14) 99741-1040', 
-    'https://www.transportesflow.com.br/lovable-uploads/181905e7-a700-4785-b4c7-181b13e7b387.png', 
+    'Flow Transportes',
+    '12.345.678/0001-99',
+    (SELECT id FROM Address WHERE zip_code = '06852-845' LIMIT 1),
+    '(14) 99741-1040',
+    'https://www.transportesflow.com.br/lovable-uploads/181905e7-a700-4785-b4c7-181b13e7b387.png',
     TRUE
 );
 
@@ -227,23 +228,23 @@ INSERT INTO Corporation (name, cnpj, address_id, phone, logo_url, is_active) VAL
 CREATE TABLE CorporationUsers (
     corporation_id UUID NOT NULL REFERENCES Corporation(id) ON DELETE CASCADE,
     manager_id UUID NOT NULL REFERENCES Users(id) ON DELETE CASCADE,
-    PRIMARY KEY (corporation_id, manager_id) 
+    PRIMARY KEY (corporation_id, manager_id)
 );
 
 INSERT INTO CorporationUsers (corporation_id, manager_id) VALUES (
-    (SELECT id FROM Corporation WHERE cnpj = '12.345.678/0001-99' LIMIT 1), 
+    (SELECT id FROM Corporation WHERE cnpj = '12.345.678/0001-99' LIMIT 1),
     (SELECT id FROM Users WHERE email_user = 'cesar.filho@flow.com.br' LIMIT 1)
 ), (
-    (SELECT id FROM Corporation WHERE cnpj = '12.345.678/0001-99' LIMIT 1), 
+    (SELECT id FROM Corporation WHERE cnpj = '12.345.678/0001-99' LIMIT 1),
     (SELECT id FROM Users WHERE email_user = 'edson.barbosa@flow.com.br' LIMIT 1)
 ), (
-    (SELECT id FROM Corporation WHERE cnpj = '12.345.678/0001-99' LIMIT 1), 
+    (SELECT id FROM Corporation WHERE cnpj = '12.345.678/0001-99' LIMIT 1),
     (SELECT id FROM Users WHERE email_user = 'thamyres.doc@flow.com.br' LIMIT 1)
 ), (
-    (SELECT id FROM Corporation WHERE cnpj = '12.345.678/0001-99' LIMIT 1), 
+    (SELECT id FROM Corporation WHERE cnpj = '12.345.678/0001-99' LIMIT 1),
     (SELECT id FROM Users WHERE email_user = 'milena.reis@flow.com.br' LIMIT 1)
 ), (
-    (SELECT id FROM Corporation WHERE cnpj = '12.345.678/0001-99' LIMIT 1), 
+    (SELECT id FROM Corporation WHERE cnpj = '12.345.678/0001-99' LIMIT 1),
     (SELECT id FROM Users WHERE email_user = 'kevinklgvg@gmail.com' LIMIT 1)
 );
 
@@ -277,6 +278,7 @@ CREATE TABLE Vehicles (
     year INT NOT NULL,
     type VehicleType DEFAULT 'Cavalo',
     license_plate VARCHAR(7) NOT NULL UNIQUE,
+    capacity_fuel DECIMAL(10, 2),
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
 
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -288,7 +290,7 @@ INSERT INTO Vehicles (make, model, year, type, license_plate, is_active) VALUES
 ('Volvo', 'FH16', 2020, 'Cavalo', 'ABC1234', TRUE),
 ('Scania', 'R500', 2019, 'Carreta', 'DEF5678', TRUE),
 ('Mercedes-Benz', 'Actros', 2021, 'Cavalo', 'GHI9012', TRUE),
-('Ford', 'Cargo 2429', 2018, 'Truck', 'JKL3456', TRUE), 
+('Ford', 'Cargo 2429', 2018, 'Truck', 'JKL3456', TRUE),
 ('Volkswagen', 'Constellation 24.280', 2017, 'Truck', 'MNO7890', TRUE),
 ('Fiat', 'Ducato', 2020, 'Van', 'PQR2345', TRUE),
 ('Renault', 'Master', 2019, 'Van', 'STU6789', TRUE);
@@ -304,101 +306,122 @@ CREATE TABLE VehicleOwners (
 );
 
 INSERT INTO VehicleOwners (corporation_id, vehicle_id, created_by) VALUES (
-    (SELECT id FROM Corporation WHERE cnpj = '12.345.678/0001-99' LIMIT 1), 
+    (SELECT id FROM Corporation WHERE cnpj = '12.345.678/0001-99' LIMIT 1),
     (SELECT id FROM Vehicles WHERE license_plate = 'ABC1234' LIMIT 1),
     (SELECT id FROM Users WHERE email_user = 'kevinklgvg@gmail.com' LIMIT 1)
-), 
+),
 (
-    (SELECT id FROM Corporation WHERE cnpj = '12.345.678/0001-99' LIMIT 1), 
+    (SELECT id FROM Corporation WHERE cnpj = '12.345.678/0001-99' LIMIT 1),
     (SELECT id FROM Vehicles WHERE license_plate = 'DEF5678' LIMIT 1),
     (SELECT id FROM Users WHERE email_user = 'kevinklgvg@gmail.com' LIMIT 1)
-), 
+),
 (
-    (SELECT id FROM Corporation WHERE cnpj = '12.345.678/0001-99' LIMIT 1), 
+    (SELECT id FROM Corporation WHERE cnpj = '12.345.678/0001-99' LIMIT 1),
     (SELECT id FROM Vehicles WHERE license_plate = 'GHI9012' LIMIT 1),
     (SELECT id FROM Users WHERE email_user = 'kevinklgvg@gmail.com' LIMIT 1)
-), 
+),
 (
-    (SELECT id FROM Corporation WHERE cnpj = '12.345.678/0001-99' LIMIT 1), 
+    (SELECT id FROM Corporation WHERE cnpj = '12.345.678/0001-99' LIMIT 1),
     (SELECT id FROM Vehicles WHERE license_plate = 'JKL3456' LIMIT 1),
     (SELECT id FROM Users WHERE email_user = 'kevinklgvg@gmail.com' LIMIT 1)
-), 
+),
 (
-    (SELECT id FROM Corporation WHERE cnpj = '12.345.678/0001-99' LIMIT 1), 
+    (SELECT id FROM Corporation WHERE cnpj = '12.345.678/0001-99' LIMIT 1),
     (SELECT id FROM Vehicles WHERE license_plate = 'MNO7890' LIMIT 1),
     (SELECT id FROM Users WHERE email_user = 'kevinklgvg@gmail.com' LIMIT 1)
-), 
+),
 (
-    (SELECT id FROM Corporation WHERE cnpj = '12.345.678/0001-99' LIMIT 1), 
+    (SELECT id FROM Corporation WHERE cnpj = '12.345.678/0001-99' LIMIT 1),
     (SELECT id FROM Vehicles WHERE license_plate = 'PQR2345' LIMIT 1),
     (SELECT id FROM Users WHERE email_user = 'kevinklgvg@gmail.com' LIMIT 1)
-), 
+),
 (
-    (SELECT id FROM Corporation WHERE cnpj = '12.345.678/0001-99' LIMIT 1), 
+    (SELECT id FROM Corporation WHERE cnpj = '12.345.678/0001-99' LIMIT 1),
     (SELECT id FROM Vehicles WHERE license_plate = 'STU6789' LIMIT 1),
     (SELECT id FROM Users WHERE email_user = 'kevinklgvg@gmail.com' LIMIT 1)
-);  
+);
 
 CREATE TABLE Fuel (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     vehicle_id UUID NOT NULL REFERENCES Vehicles(id) ON DELETE CASCADE,
+    gas_station_name VARCHAR(100),
+    fuel_type FuelType NOT NULL DEFAULT 'Diesel S10',
     liters DECIMAL(10, 2) NOT NULL,
+    total_price DECIMAL(10, 2) NOT NULL,
+    unit_price DECIMAL(10, 2) GENERATED ALWAYS AS (total_price / liters) STORED
     current_odometer INT NOT NULL,
-    total_price DECIMAL(10, 2),
+    is_full_tank BOOLEAN NOT NULL DEFAULT TRUE,
+    date_fuel DATE NOT NULL,
+
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     created_by UUID NOT NULL REFERENCES Users(id)
 );
 
-INSERT INTO Fuel (vehicle_id, liters, current_odometer, total_price, created_by) VALUES 
+CREATE INDEX idx_fuel_vehicle_date ON Fuel (vehicle_id, created_at DESC);
+
+INSERT INTO Fuel (
+    vehicle_id,
+    fuel_type,
+    liters,
+    unit_price,
+    total_price,
+    current_odometer,
+    is_full_tank,
+    gas_station_name,
+    created_by
+) VALUES
 (
     (SELECT id FROM Vehicles WHERE license_plate = 'ABC1234' LIMIT 1),
-    45.50, 12500, 263.90,
+    'Gasolina', 45.50, 5.80, 263.90, 12500, TRUE, 'Posto Shell Central',
     (SELECT id FROM Users WHERE email_user = 'kevinklgvg@gmail.com' LIMIT 1)
 ),
 (
     (SELECT id FROM Vehicles WHERE license_plate = 'DEF5678' LIMIT 1),
-    38.20, 34200, 221.56,
+    'Etanol', 38.20, 5.80, 221.56, 34200, TRUE, 'Posto Ipiranga Rodo',
     (SELECT id FROM Users WHERE email_user = 'kevinklgvg@gmail.com' LIMIT 1)
 ),
 (
     (SELECT id FROM Vehicles WHERE license_plate = 'GHI9012' LIMIT 1),
-    50.00, 8910, 290.00,
+    'Gasolina', 50.00, 5.80, 290.00, 8910, TRUE, 'Auto Posto BR 101',
     (SELECT id FROM Users WHERE email_user = 'kevinklgvg@gmail.com' LIMIT 1)
 ),
 (
     (SELECT id FROM Vehicles WHERE license_plate = 'JKL3456' LIMIT 1),
-    42.15, 51650, 244.47,
+    'Diesel S10', 42.15, 5.80, 244.47, 51650, TRUE, 'Posto Graal Sul',
     (SELECT id FROM Users WHERE email_user = 'kevinklgvg@gmail.com' LIMIT 1)
 ),
 (
     (SELECT id FROM Vehicles WHERE license_plate = 'MNO7890' LIMIT 1),
-    55.00, 120400, 319.00,
+    'Diesel S10', 55.00, 5.80, 319.00, 120400, TRUE, 'Posto Graal Sul',
     (SELECT id FROM Users WHERE email_user = 'kevinklgvg@gmail.com' LIMIT 1)
 ),
 (
     (SELECT id FROM Vehicles WHERE license_plate = 'PQR2345' LIMIT 1),
-    35.80, 23150, 207.64,
+    'Gasolina', 35.80, 5.80, 207.64, 23150, TRUE, 'Posto Shell Central',
     (SELECT id FROM Users WHERE email_user = 'kevinklgvg@gmail.com' LIMIT 1)
 ),
 (
     (SELECT id FROM Vehicles WHERE license_plate = 'STU6789' LIMIT 1),
-    48.90, 41320, 283.62,
+    'Diesel S10', 48.90, 5.80, 283.62, 41320, TRUE, 'Auto Posto BR 101',
     (SELECT id FROM Users WHERE email_user = 'kevinklgvg@gmail.com' LIMIT 1)
 ),
+
 (
-    (SELECT id FROM Vehicles WHERE license_plate = 'ABC1234' LIMIT 1), 
-    44.10, 13120, 255.78,
+    (SELECT id FROM Vehicles WHERE license_plate = 'ABC1234' LIMIT 1),
+    'Gasolina', 44.10, 5.80, 255.78, 13120, TRUE, 'Posto Ipiranga Rodo',
     (SELECT id FROM Users WHERE email_user = 'kevinklgvg@gmail.com' LIMIT 1)
 ),
+
 (
     (SELECT id FROM Vehicles WHERE license_plate = 'DEF5678' LIMIT 1),
-    39.50, 34850, 229.10,
+    'Etanol', 39.50, 5.80, 229.10, 34850, TRUE, 'Posto Ipiranga Rodo',
     (SELECT id FROM Users WHERE email_user = 'kevinklgvg@gmail.com' LIMIT 1)
 ),
+
 (
-    (SELECT id FROM Vehicles WHERE license_plate = 'GHI9012' LIMIT 1), 
-    52.30, 9540, 303.34,
+    (SELECT id FROM Vehicles WHERE license_plate = 'GHI9012' LIMIT 1),
+    'Gasolina', 52.30, 5.80, 303.34, 9540, TRUE, 'Posto Shell Central',
     (SELECT id FROM Users WHERE email_user = 'kevinklgvg@gmail.com' LIMIT 1)
 );
 
@@ -413,36 +436,37 @@ CREATE TABLE Status (
     created_by UUID NOT NULL REFERENCES Users(id) ON DELETE CASCADE
 );
 
-INSERT INTO Status (code, name, description, corporation_id, created_by) VALUES 
+INSERT INTO Status (code, name, description, corporation_id, created_by) VALUES
 (
-    1, 
-    'Produto Entregue', 
-    'Mercadoria entregue ao cliente', 
-    (SELECT id FROM Corporation WHERE cnpj = '12.345.678/0001-99' LIMIT 1), 
+    1,
+    'Produto Entregue',
+    'Mercadoria entregue ao cliente',
+    (SELECT id FROM Corporation WHERE cnpj = '12.345.678/0001-99' LIMIT 1),
     (SELECT id FROM Users WHERE email_user = 'kevinklgvg@gmail.com' LIMIT 1)
 ),
 (
-    22, 
-    'Mercadoria em Trânsito', 
-    'Produto em trânsito para o cliente', 
-    (SELECT id FROM Corporation WHERE cnpj = '12.345.678/0001-99' LIMIT 1), 
-    (SELECT id FROM Users WHERE email_user = 'kevinklgvg@gmail.com' LIMIT 1)
-), 
-(
-    5, 
-    'Coleta Realizada', 
-    'Produto aguardando retirada pelo cliente', 
-    (SELECT id FROM Corporation WHERE cnpj = '12.345.678/0001-99' LIMIT 1), 
+    22,
+    'Mercadoria em Trânsito',
+    'Produto em trânsito para o cliente',
+    (SELECT id FROM Corporation WHERE cnpj = '12.345.678/0001-99' LIMIT 1),
     (SELECT id FROM Users WHERE email_user = 'kevinklgvg@gmail.com' LIMIT 1)
 ),
 (
-    10, 
-    'Retorno de mercadoria', 
-    'Produto aguardando envio para o cliente', 
-    (SELECT id FROM Corporation WHERE cnpj = '12.345.678/0001-99' LIMIT 1), 
+    5,
+    'Coleta Realizada',
+    'Produto aguardando retirada pelo cliente',
+    (SELECT id FROM Corporation WHERE cnpj = '12.345.678/0001-99' LIMIT 1),
+    (SELECT id FROM Users WHERE email_user = 'kevinklgvg@gmail.com' LIMIT 1)
+),
+(
+    10,
+    'Retorno de mercadoria',
+    'Produto aguardando envio para o cliente',
+    (SELECT id FROM Corporation WHERE cnpj = '12.345.678/0001-99' LIMIT 1),
     (SELECT id FROM Users WHERE email_user = 'kevinklgvg@gmail.com' LIMIT 1)
 );
 
+CREATE INDEX idx_fuel_corporation_vehicle ON Fuel (corporation_id, vehicle_id, created_at DESC);
 
 
 CREATE TABLE Clients (

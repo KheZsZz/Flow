@@ -1,18 +1,24 @@
 import { Request, Response, NextFunction } from "express";
 import { AuthRequest } from "@/middleware/auth";
 import { supabase, supabaseAdmin } from "@/config/supabase";
-import { LoginUserType, UserSchema, LoginUserSchema, RegisterUserSchema } from "@/schemas/usersSchema";
+import {
+  LoginUserType,
+  UserSchema,
+  LoginUserSchema,
+  RegisterUserSchema,
+} from "@/schemas/usersSchema";
 import { toE164 } from "@/utils/convert_phone";
 
 class UserController {
-
   async signUp(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { name_user, email_user, password_user, phone_user, profile_user } =
         RegisterUserSchema.parse(req.body);
 
       if (!req.company?.id || !req.user?.id) {
-        return res.status(403).json({ error: "Company context not found in request" });
+        return res
+          .status(403)
+          .json({ error: "Company context not found in request" });
       }
 
       const { data, error } = await supabaseAdmin.auth.admin.createUser({
@@ -70,7 +76,9 @@ class UserController {
         .single();
 
       if (belongsError || !belongs) {
-        return res.status(403).json({ error: "User does not belong to your corporation" });
+        return res
+          .status(403)
+          .json({ error: "User does not belong to your corporation" });
       }
 
       const { error } = await supabaseAdmin.auth.admin.deleteUser(id as string);
@@ -96,7 +104,6 @@ class UserController {
         is_active,
       } = UserSchema.parse(req.body);
 
-
       const { data: belongs, error: belongsError } = await supabaseAdmin
         .from("corporationusers")
         .select("manager_id")
@@ -105,7 +112,9 @@ class UserController {
         .single();
 
       if (belongsError || !belongs) {
-        return res.status(403).json({ error: "User does not belong to your corporation" });
+        return res
+          .status(403)
+          .json({ error: "User does not belong to your corporation" });
       }
 
       const updateAuthParams: any = {};
@@ -114,10 +123,13 @@ class UserController {
       if (phone_user) updateAuthParams.phone = toE164(phone_user);
 
       if (Object.keys(updateAuthParams).length > 0) {
-        const { error: authUpdateError } = await supabaseAdmin.auth.admin.updateUserById(id as string, updateAuthParams);
+        const { error: authUpdateError } =
+          await supabaseAdmin.auth.admin.updateUserById(
+            id as string,
+            updateAuthParams,
+          );
         if (authUpdateError) throw authUpdateError;
       }
-
 
       const { data, error: dbError } = await supabase
         .from("users")
@@ -126,21 +138,23 @@ class UserController {
           email_user,
           profile_user,
           avatar_url,
-          is_active,       
+          is_active,
           updated_at: new Date().toISOString(),
         })
-        .eq("id", id)      
+        .eq("id", id)
         .select()
         .single();
 
       if (dbError) throw dbError;
 
-      return res.status(200).json({ message: "User updated successfully", data });
+      return res
+        .status(200)
+        .json({ message: "User updated successfully", data });
     } catch (error) {
       next(error);
     }
   }
-  
+
   async disable(req: AuthRequest, res: Response, next: NextFunction) {
     const { id } = req.params;
     try {
@@ -180,27 +194,29 @@ class UserController {
   }
 
   async signIn(req: Request, res: Response, next: NextFunction) {
-    const { email_user, password_user }: LoginUserType = LoginUserSchema.parse(req.body);
-    
+    const { email_user, password_user }: LoginUserType = LoginUserSchema.parse(
+      req.body,
+    );
+
     if (!email_user || !password_user) {
       return res
-      .status(400)
-      .json({ error: "Email and password are required." });
+        .status(400)
+        .json({ error: "Email and password are required." });
     }
-    
+
     try {
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email: email_user,
-          password: password_user,
-        });
-        if (error) throw error;
-        res
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email_user,
+        password: password_user,
+      });
+      if (error) throw error;
+      res
         .status(200)
-          .json({ authorized: true, token: data.session.access_token });
-      } catch (error) {
-        next(error);
-      }
-  } 
+        .json({ authorized: true, token: data.session.access_token });
+    } catch (error) {
+      next(error);
+    }
+  }
 
   async signOut(req: Request, res: Response, next: NextFunction) {
     try {
@@ -219,11 +235,13 @@ class UserController {
   async findDrivesById(req: AuthRequest, res: Response, next: NextFunction) {
     const { id } = req.params;
     try {
-      if (!req.company?.id) throw new Error("Company context not found in request");
+      if (!req.company?.id)
+        throw new Error("Company context not found in request");
 
       const { data, error } = await supabase
         .from("corporationusers")
-        .select(`
+        .select(
+          `
           users!manager_id (
             id,
             name_user,
@@ -238,9 +256,10 @@ class UserController {
               mopp
             )
           )
-        `)
+        `,
+        )
         .eq("corporation_id", req.company?.id)
-        .eq("manager_id", id)  // ← filtra o motorista pelo id da rota
+        .eq("manager_id", id) // ← filtra o motorista pelo id da rota
         .single();
 
       if (error) throw error;
@@ -248,7 +267,9 @@ class UserController {
       const user = (data as any).users;
 
       if (!user || user.profile_user !== "Driver") {
-        return res.status(404).json({ error: "Driver not found in your corporation" });
+        return res
+          .status(404)
+          .json({ error: "Driver not found in your corporation" });
       }
 
       return res.status(200).json(user);
@@ -256,18 +277,21 @@ class UserController {
       next(error);
     }
   }
-    
+
   async findAllDrivers(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const companyId = req.company?.id;
 
       if (!companyId) {
-        return res.status(400).json({ error: "Company context not found in request" });
+        return res
+          .status(400)
+          .json({ error: "Company context not found in request" });
       }
 
       const { data, error } = await supabase
         .from("corporationusers")
-        .select(`
+        .select(
+          `
           users!manager_id (
             id,
             name_user,
@@ -282,12 +306,14 @@ class UserController {
               mopp
             )
           )
-        `)
+        `,
+        )
         .eq("corporation_id", companyId);
 
       if (error) throw error;
 
-      const drivers = data.map((row) => row.users as any)
+      const drivers = data
+        .map((row) => row.users as any)
         .filter((user) => user !== null && user.profile_user === "Driver");
 
       return res.status(200).json(drivers);
@@ -295,7 +321,6 @@ class UserController {
       next(error);
     }
   }
-
 }
-  
+
 export const userController = new UserController();

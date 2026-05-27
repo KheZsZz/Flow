@@ -6,7 +6,10 @@ import { statusSchema, StatusTypes } from "@/schemas/statusSchema";
 class statusController {
   async create(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const { code, name, description }: StatusTypes = statusSchema.parse(req.body);
+      const statusData = statusSchema.parse({
+        ...req.body,
+        created_by: req.user?.id,
+      });
 
       if (!req.company?.id || !req.user?.id) {
         return res
@@ -15,14 +18,8 @@ class statusController {
       }
 
       const { data, error } = await supabase
-        .from("Status")
-        .insert({
-          code: code.toUpperCase().trim(),
-          name,
-          description,
-          corporation_id: req.user?.id,
-          created_by: req.company?.id,
-        })
+        .from("status")
+        .insert({ ...statusData })
         .select()
         .single();
 
@@ -46,7 +43,7 @@ class statusController {
       }
 
       const { data, error } = await supabase
-        .from("Status")
+        .from("status")
         .select("id, code, name, description")
         .eq("corporation_id", req.company?.id)
         .order("code", { ascending: true });
@@ -62,7 +59,10 @@ class statusController {
   async update(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const { name, description }: StatusTypes = statusSchema.parse(req.body);
+      const statusUpdate = statusSchema.parse({
+        ...req.body,
+        updated_at: new Date().toISOString(),
+      });
 
       if (!req.company?.id) {
         return res
@@ -72,11 +72,7 @@ class statusController {
 
       const { data, error } = await supabase
         .from("Status")
-        .update({
-          name,
-          description,
-          updated_at: new Date().toISOString(),
-        })
+        .update({ ...statusUpdate })
         .eq("id", id)
         .eq("corporation_id", req.company?.id)
         .select()
@@ -112,6 +108,31 @@ class statusController {
       if (error) throw error;
 
       return res.status(200).json({ message: "Status deleted successfully" });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async findByCode(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const { code } = req.params;
+
+      if (!req.company?.id) {
+        return res
+          .status(400)
+          .json({ error: "Company context not found in request" });
+      }
+
+      const { data, error } = await supabase
+        .from("status")
+        .select()
+        .eq("code", code)
+        .eq("corporation_id", req.company?.id)
+        .single();
+
+      if (error) throw error;
+
+      return res.status(200).json(data);
     } catch (error) {
       next(error);
     }

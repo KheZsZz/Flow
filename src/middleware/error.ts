@@ -5,9 +5,8 @@ export const errorHandler = (
   err: any,
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
-
   if (err instanceof ZodError) {
     return res.status(400).json({
       status: "validation_error",
@@ -19,37 +18,34 @@ export const errorHandler = (
     });
   }
 
-
   if (err.code) {
     switch (err.code) {
-    
-      case "23505": 
+      case "23505":
         return res.status(409).json({
           status: "conflict",
           message: "Este registro já existe no sistema.",
-          detail: err.detail || undefined
+          detail: err.detail || undefined,
         });
 
-     
       case "22P02":
         return res.status(400).json({
           status: "bad_request",
-          message: "O formato do identificador (ID) ou dado enviado é inválido.",
+          message:
+            "O formato do identificador (ID) ou dado enviado é inválido.",
         });
 
-     
       case "23503":
         return res.status(404).json({
           status: "not_found",
-          message: "O registro pai associado não foi encontrado (relação inválida).",
+          message:
+            "O registro pai associado não foi encontrado (relação inválida).",
         });
     }
   }
 
-
-  const isAuthError = 
-    err.status === 401 || 
-    err.name === "AuthApiError" || 
+  const isAuthError =
+    err.status === 401 ||
+    err.name === "AuthApiError" ||
     err.message?.toLowerCase().includes("invalid claim") ||
     err.message?.toLowerCase().includes("unauthorized") ||
     err.message?.toLowerCase().includes("jwt");
