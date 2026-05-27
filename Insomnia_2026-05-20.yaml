@@ -31,7 +31,8 @@ collection:
             description: ""
             disabled: false
           - name: Authorization
-            value: Bearer {% response 'body', 'req_ac69e3f162b549a6940d1e5e5ce5d72a',
+            value:
+              Bearer {% response 'body', 'req_ac69e3f162b549a6940d1e5e5ce5d72a',
               'b64::JC50b2tlbg==::46b', 'always', 60 %}
             description: ""
             disabled: false
@@ -74,7 +75,8 @@ collection:
             description: ""
             disabled: false
           - name: Authorization
-            value: Bearer {% response 'body', 'req_ac69e3f162b549a6940d1e5e5ce5d72a',
+            value:
+              Bearer {% response 'body', 'req_ac69e3f162b549a6940d1e5e5ce5d72a',
               'b64::JC50b2tlbg==::46b', 'always', 60 %}
             description: ""
             disabled: false
@@ -120,7 +122,8 @@ collection:
             description: ""
             disabled: false
           - name: Authorization
-            value: Bearer {% response 'body', 'req_ac69e3f162b549a6940d1e5e5ce5d72a',
+            value:
+              Bearer {% response 'body', 'req_ac69e3f162b549a6940d1e5e5ce5d72a',
               'b64::JC50b2tlbg==::46b', 'always', 60 %}
             description: ""
             disabled: false
@@ -150,7 +153,8 @@ collection:
             description: ""
             disabled: false
           - name: Authorization
-            value: Bearer {% response 'body', 'req_ac69e3f162b549a6940d1e5e5ce5d72a',
+            value:
+              Bearer {% response 'body', 'req_ac69e3f162b549a6940d1e5e5ce5d72a',
               'b64::JC50b2tlbg==::46b', 'always', 60 %}
             description: ""
             disabled: false
@@ -178,7 +182,8 @@ collection:
             description: ""
             disabled: false
           - name: Authorization
-            value: Bearer {% response 'body', 'req_ac69e3f162b549a6940d1e5e5ce5d72a',
+            value:
+              Bearer {% response 'body', 'req_ac69e3f162b549a6940d1e5e5ce5d72a',
               'b64::JC50b2tlbg==::46b', 'always', 60 %}
             description: ""
             disabled: false
@@ -206,7 +211,8 @@ collection:
             description: ""
             disabled: false
           - name: Authorization
-            value: Bearer {% response 'body', 'req_ac69e3f162b549a6940d1e5e5ce5d72a',
+            value:
+              Bearer {% response 'body', 'req_ac69e3f162b549a6940d1e5e5ce5d72a',
               'b64::JC50b2tlbg==::46b', 'always', 60 %}
             description: ""
             disabled: false
@@ -242,7 +248,8 @@ collection:
                 description: ""
                 disabled: false
               - name: Authorization
-                value: Bearer {% response 'body', 'req_ac69e3f162b549a6940d1e5e5ce5d72a',
+                value:
+                  Bearer {% response 'body', 'req_ac69e3f162b549a6940d1e5e5ce5d72a',
                   'b64::JC50b2tlbg==::46b', 'always', 60 %}
                 description: ""
                 disabled: false
@@ -270,7 +277,8 @@ collection:
                 description: ""
                 disabled: false
               - name: Authorization
-                value: Bearer {% response 'body', 'req_ac69e3f162b549a6940d1e5e5ce5d72a',
+                value:
+                  Bearer {% response 'body', 'req_ac69e3f162b549a6940d1e5e5ce5d72a',
                   'b64::JC50b2tlbg==::46b', 'always', 60 %}
                 description: ""
                 disabled: false
@@ -372,7 +380,8 @@ collection:
             description: ""
             disabled: false
           - name: Authorization
-            value: Bearer {% response 'body', 'req_ac69e3f162b549a6940d1e5e5ce5d72a',
+            value:
+              Bearer {% response 'body', 'req_ac69e3f162b549a6940d1e5e5ce5d72a',
               'b64::JC50b2tlbg==::46b', 'always', 60 %}
             description: ""
             disabled: false
