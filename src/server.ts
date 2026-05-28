@@ -8,6 +8,7 @@ const app = Express();
 const PORT = process.env.PORT || 3000;
 
 app.use(Express.json());
+app.use(Express.urlencoded({ extended: true }));
 app.use(cors());
 
 app.use((req, res, next) => {
