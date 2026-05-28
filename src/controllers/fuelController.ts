@@ -6,26 +6,43 @@ import { AuthRequest } from "@/middleware/auth";
 class FuelController {
   async create(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const fuelData = FuelSchema.parse({
-        ...req.body,
-        corporation_id: req.company?.id,
-      });
-
-      if (!req.company?.id) {
+      if (!req.company?.id || !req.user?.id) {
         return res.status(400).json({ message: "Company ID is required" });
+      }
+
+      const fuelData = FuelSchema.parse(req.body);
+
+      const { data: owner, error: ownerError } = await supabaseAdmin
+        .from("vehicleowners")
+        .select("vehicle_id")
+        .eq("vehicle_id", fuelData.vehicle_id)
+        .eq("corporation_id", req.company.id)
+        .single();
+
+      if (ownerError || !owner) {
+        return res.status(403).json({ error: "Vehicle does not belong to your corporation" });
       }
 
       const { data, error } = await supabaseAdmin
         .from("fuel")
-        .insert([{ ...fuelData }])
+        .insert({
+          vehicle_id:       fuelData.vehicle_id,
+          gas_station_name: fuelData.gas_station_name,
+          fuel_type:        fuelData.fuel_type,
+          liters:           fuelData.liters,
+          total_price:      fuelData.total_price,
+          unit_price:       fuelData.unit_price,
+          current_odometer: fuelData.current_odometer,
+          is_full_tank:     fuelData.is_full_tank,
+          date_fuel:        fuelData.date_fuel,
+          created_by:       req.user.id,
+        })
         .select()
         .single();
 
-      if (error) throw next(error);
+      if (error) throw error;
 
-      res
-        .status(201)
-        .json({ message: "Fuel record created successfully", data: data });
+      return res.status(201).json({ message: "Fuel record created successfully", data });
     } catch (error) {
       next(error);
     }
@@ -33,28 +50,54 @@ class FuelController {
   async update(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const fuelData = FuelSchema.parse({
-        ...req.body,
-        corporation_id: req.company?.id,
-      });
 
-      if (!req.company?.id) {
+      if (!req.company?.id || !req.user?.id) {
         return res.status(400).json({ message: "Company ID is required" });
+      }
+
+      const fuelData = FuelSchema.parse(req.body);
+
+      const { data: fuelRecord, error: fuelError } = await supabaseAdmin
+        .from("fuel")
+        .select("vehicle_id")
+        .eq("id", id)
+        .single();
+
+      if (fuelError || !fuelRecord) {
+        return res.status(404).json({ error: "Fuel record not found" });
+      }
+
+      const { data: owner, error: ownerError } = await supabaseAdmin
+        .from("vehicleowners")
+        .select("vehicle_id")
+        .eq("vehicle_id", fuelRecord.vehicle_id)
+        .eq("corporation_id", req.company.id)
+        .single();
+
+      if (ownerError || !owner) {
+        return res.status(403).json({ error: "Vehicle does not belong to your corporation" });
       }
 
       const { data, error } = await supabaseAdmin
         .from("fuel")
-        .update([{ ...fuelData }])
+        .update({
+          vehicle_id:       fuelData.vehicle_id,
+          gas_station_name: fuelData.gas_station_name,
+          fuel_type:        fuelData.fuel_type,
+          liters:           fuelData.liters,
+          total_price:      fuelData.total_price,
+          unit_price:       fuelData.unit_price,
+          current_odometer: fuelData.current_odometer,
+          is_full_tank:     fuelData.is_full_tank,
+          date_fuel:        fuelData.date_fuel,
+        })
         .eq("id", id)
-        .eq("corporation_id", req.company?.id)
         .select()
         .single();
 
-      if (error) throw next(error);
+      if (error) throw error;
 
-      res
-        .status(200)
-        .json({ message: "Fuel record updated successfully", data: data });
+      return res.status(200).json({ message: "Fuel record updated successfully", data });
     } catch (error) {
       next(error);
     }
@@ -62,19 +105,40 @@ class FuelController {
   async delete(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const { data, error } = await supabaseAdmin
+
+      if (!req.company?.id) {
+        return res.status(400).json({ message: "Company ID is required" });
+      }
+      
+      const { data: fuelRecord, error: fuelError } = await supabaseAdmin
         .from("fuel")
-        .delete()
+        .select("vehicle_id")
         .eq("id", id)
-        .eq("corporation_id", req.company?.id)
-        .select()
         .single();
 
-      if (error) throw next(error);
+      if (fuelError || !fuelRecord) {
+        return res.status(404).json({ error: "Fuel record not found" });
+      }
 
-      res
-        .status(200)
-        .json({ message: "Fuel record deleted successfully", data: data });
+      const { data: owner, error: ownerError } = await supabaseAdmin
+        .from("vehicleowners")
+        .select("vehicle_id")
+        .eq("vehicle_id", fuelRecord.vehicle_id)
+        .eq("corporation_id", req.company.id)
+        .single();
+
+      if (ownerError || !owner) {
+        return res.status(403).json({ error: "Vehicle does not belong to your corporation" });
+      }
+
+      const { error } = await supabaseAdmin
+        .from("fuel")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+
+      return res.status(200).json({ message: "Fuel record deleted successfully" });
     } catch (error) {
       next(error);
     }
@@ -105,11 +169,7 @@ class FuelController {
         .from("fuel")
         .select(
           `
-          id,
-          liters,
-          current_odometer,
-          total_price,
-          created_at,
+          *,
           vehicles!vehicle_id (
             id,
             license_plate,

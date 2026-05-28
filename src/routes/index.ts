@@ -9,9 +9,10 @@ import addressRoutes from "@/routes/addressRoutes";
 import statusRoutes from "@/routes/statusRoutes";
 import driverRoutes from "@/routes/driversRoutes";
 import fuelRoutes from "@/routes/fuelRoutes";
+import dashboardRouter from "@/routes/dashboardRouter"; 
 
 const router = Router();
-
+router.use("/dashboard", authMiddleware.authUser, authMiddleware.reqCompany, authMiddleware.requireRole('Admin') ,  dashboardRouter); 
 router.use("/auth", authRoutes);
 router.use("/users", userRoutes);
 router.use("/corporate", corporateRoutes);
