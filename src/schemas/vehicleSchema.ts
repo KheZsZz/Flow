@@ -46,7 +46,7 @@ export const vehicleOwnerSchema = z.object({
 
 export const FuelSchema = z
   .object({
-    id: z.string().uuid("ID do abastecimento inválido"),
+    id: z.string().uuid("ID do abastecimento inválido").optional(),
     vehicle_id: z.string().uuid("ID do veículo inválido"),
     gas_station_name: z
       .string()
@@ -61,7 +61,9 @@ export const FuelSchema = z
       .number()
       .nonnegative("O odômetro atual deve ser maior ou igual a zero"),
     is_full_tank: z.boolean().default(false),
-    date_fuel: z.date().optional(),
+    date_fuel: z.coerce.date({
+      error: "Data de abastecimento inválida",
+    }).optional(),
     created_by: z.string().uuid("ID do criador inválido").optional(),
   })
   .transform((data) => {
