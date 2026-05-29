@@ -1,4 +1,4 @@
-import { Router } from "express";
+import express from "express";
 import { authMiddleware } from "@/middleware/auth";
 
 import authRoutes from "@/routes/authRoutes";
@@ -9,10 +9,18 @@ import addressRoutes from "@/routes/addressRoutes";
 import statusRoutes from "@/routes/statusRoutes";
 import driverRoutes from "@/routes/driversRoutes";
 import fuelRoutes from "@/routes/fuelRoutes";
-import dashboardRouter from "@/routes/dashboardRouter"; 
+import dashboardRouter from "@/routes/dashboardRouter";
+import invoiceRoutes from "@/routes/invoicesRoutes";
 
-const router = Router();
-router.use("/dashboard", authMiddleware.authUser, authMiddleware.reqCompany, authMiddleware.requireRole('Admin') ,  dashboardRouter); 
+const router = express.Router();
+
+router.use(
+  "/dashboard",
+  authMiddleware.authUser,
+  authMiddleware.reqCompany,
+  authMiddleware.requireRole("Admin"),
+  dashboardRouter,
+);
 router.use("/auth", authRoutes);
 router.use("/users", userRoutes);
 router.use("/corporate", corporateRoutes);
@@ -52,4 +60,10 @@ router.use(
   fuelRoutes,
 );
 
+router.use(
+  "/invoices",
+  authMiddleware.authUser,
+  authMiddleware.reqCompany,
+  invoiceRoutes,
+);
 export default router;
