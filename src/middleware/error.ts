@@ -8,6 +8,7 @@ export const errorHandler = (
   next: NextFunction,
 ) => {
   if (err instanceof ZodError) {
+    console.log(err);
     return res.status(400).json({
       status: "validation_error",
       message: "Os dados enviados são inválidos.",
@@ -19,6 +20,7 @@ export const errorHandler = (
   }
 
   if (err.code) {
+    console.log(err);
     switch (err.code) {
       case "23505":
         return res.status(409).json({
@@ -50,7 +52,10 @@ export const errorHandler = (
     err.message?.toLowerCase().includes("unauthorized") ||
     err.message?.toLowerCase().includes("jwt");
 
+  console.log(isAuthError);
+
   if (isAuthError) {
+    console.log(isAuthError);
     return res.status(401).json({
       status: "unauthorized",
       message: err.message || "Acesso não autorizado.",
