@@ -14,6 +14,10 @@ import invoiceRoutes from "@/routes/invoicesRoutes";
 
 const router = express.Router();
 
+router.use("/auth", authRoutes);
+router.use("/users", userRoutes);
+router.use("/corporate", corporateRoutes);
+
 router.use(
   "/dashboard",
   authMiddleware.authUser,
@@ -21,9 +25,6 @@ router.use(
   authMiddleware.requireRole("Admin"),
   dashboardRouter,
 );
-router.use("/auth", authRoutes);
-router.use("/users", userRoutes);
-router.use("/corporate", corporateRoutes);
 
 router.use(
   "/address",
