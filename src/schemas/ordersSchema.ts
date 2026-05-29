@@ -1,48 +1,47 @@
 import { z } from "zod";
 import { OrderTypeSchema } from "@/schemas/enumSchema";
 
-export const orderSchema = z.object({
-  id: z.string().uuid().optional(),
-  company_id: z.string().uuid("ID da empresa inválido"),
+export const orderVehicleSchema = z.object({
+  vehicle_id: z.string().uuid("ID do veículo inválido"),
+  role: z.enum(["Cavalo", "carreta"]).default("Cavalo"),
+  position: z.number().int().min(1).default(1),
+});
 
+export const orderItemInputSchema = z
+  .object({
+    invoice_id: z.string().uuid("ID da nota fiscal inválido").optional(),
+    collection_id: z.string().uuid("ID da coleta inválido").optional(),
+    type_orders: OrderTypeSchema,
+    status_id: z.string().uuid("ID do status inválido"),
+  })
+  .refine((d) => !!d.invoice_id !== !!d.collection_id, {
+    message: "Informe invoice_id ou collection_id — não os dois",
+  });
+
+export const createOrderSchema = z.object({
   status_id: z.string().uuid("ID do status inválido"),
-
-  created_at: z.coerce.date().optional(),
-  updated_at: z.coerce.date().optional(),
-  created_by: z.string().uuid("ID do criador inválido").optional(),
+  driver_id: z.string().uuid("ID do motorista inválido"),
+  delivery_date: z.coerce.date({ error: "Data de entrega inválida" }),
+  notes: z.string().max(500).optional(),
+  vehicles: z.array(orderVehicleSchema).min(1, "Informe ao menos um veículo"),
+  items: z.array(orderItemInputSchema).optional(),
 });
 
-export const orderItemSchema = z.object({
-  id: z.string().uuid().optional(),
-  company_id: z.string().uuid("ID da empresa inválido"),
-  invoice_id: z.string().uuid("ID da nota fiscal inválido"),
-  type_orders: OrderTypeSchema.default("Entrega"),
-  tracking: z.string().max(255).nullable().optional(),
-
+export const updateOrderStatusSchema = z.object({
   status_id: z.string().uuid("ID do status inválido"),
-
-  created_at: z.coerce.date().optional(),
-  updated_at: z.coerce.date().optional(),
-  created_by: z.string().uuid("ID do criador inválido").optional(),
 });
 
-export const orderReceiptSchema = z.object({
+export const collectionSchema = z.object({
   id: z.string().uuid().optional(),
-  company_id: z.string().uuid("ID da empresa inválido"),
-  order_item_id: z.string().uuid("ID do item do pedido inválido"),
-  url: z.string().url("URL do comprovante inválida").max(255),
-
-  created_at: z.coerce.date().optional(),
-  updated_at: z.coerce.date().optional(),
-  created_by: z.string().uuid("ID do criador inválido").optional(),
+  client_id: z.string().uuid("ID do cliente inválido"),
+  address_id: z.string().uuid("ID do endereço inválido").optional(),
+  description: z.string().max(500).optional(),
+  scheduled_date: z.coerce.date().optional(),
+  status_id: z.string().uuid("ID do status inválido"),
 });
 
-export const orderAddItensSchema = z.object({
-  order_id: z.string().uuid("ID do pedido inválido"),
-  order_item_id: z.string().uuid("ID do item do pedido inválido"),
-});
-
-export type OrderAddItensType = z.infer<typeof orderAddItensSchema>;
-export type OrderItemType = z.infer<typeof orderItemSchema>;
-export type OrderReceiptType = z.infer<typeof orderReceiptSchema>;
-export type OrderType = z.infer<typeof orderSchema>;
+export type CreateOrderType = z.infer<typeof createOrderSchema>;
+export type OrderVehicleType = z.infer<typeof orderVehicleSchema>;
+export type OrderItemInputType = z.infer<typeof orderItemInputSchema>;
+export type UpdateOrderStatusType = z.infer<typeof updateOrderStatusSchema>;
+export type CollectionType = z.infer<typeof collectionSchema>;
