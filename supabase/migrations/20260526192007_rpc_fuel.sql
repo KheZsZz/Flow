@@ -1,6 +1,3 @@
-ALTER TABLE Fuel
-  ADD COLUMN corporation_id   UUID REFERENCES Corporation(id); -- ← adiciona aqui
-
 CREATE OR REPLACE FUNCTION get_fuel_summary(
   p_corporation_id UUID,
   start_date TIMESTAMPTZ DEFAULT '-infinity',
