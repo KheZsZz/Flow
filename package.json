@@ -1,5 +1,5 @@
 {
-  "name": "Flow",
+  "name": "flow",
   "version": "1.0.0",
   "description": "Saas logístico",
   "main": "src/server.ts",
