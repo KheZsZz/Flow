@@ -1,13 +1,13 @@
 {
-  "name": "flow",
+  "name": "Flow",
   "version": "1.0.0",
-  "description": "ERP logístico completo",
+  "description": "Saas logístico",
   "main": "src/server.ts",
   "scripts": {
     "dev": "cross-env AMBIENT_PERFIL_ENV=development nodemon -r tsconfig-paths/register src/server.ts",
     "prod": "cross-env AMBIENT_PERFIL_ENV=production nodemon -r tsconfig-paths/register src/server.ts",
     "build": "tsc && tsc-alias",
-    "start": "node -r tsconfig-paths/register dist/server.js"
+    "start": "node dist/server.js"
   },
   "keywords": [
     "Flow Transportes",
@@ -17,6 +17,9 @@
     "Logística"
   ],
   "author": "Kevin Oliveira",
+  "contributors": [
+    "Abaranth"
+  ],
   "packageManager": "pnpm@11.1.3",
   "license": "ISC",
   "devDependencies": {
