@@ -18,7 +18,7 @@ export const orderItemInputSchema = z
     message: "Informe invoice_id ou collection_id — não os dois",
   });
 
-export const createOrderSchema = z.object({
+export const orderSchema = z.object({
   status_id: z.string().uuid("ID do status inválido"),
   driver_id: z.string().uuid("ID do motorista inválido"),
   delivery_date: z.coerce.date({ error: "Data de entrega inválida" }),
@@ -40,7 +40,7 @@ export const collectionSchema = z.object({
   status_id: z.string().uuid("ID do status inválido"),
 });
 
-export type CreateOrderType = z.infer<typeof createOrderSchema>;
+export type CreateOrderType = z.infer<typeof orderSchema>;
 export type OrderVehicleType = z.infer<typeof orderVehicleSchema>;
 export type OrderItemInputType = z.infer<typeof orderItemInputSchema>;
 export type UpdateOrderStatusType = z.infer<typeof updateOrderStatusSchema>;
