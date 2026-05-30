@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "cross-env AMBIENT_PERFIL_ENV=development nodemon -r tsconfig-paths/register src/server.ts",
     "prod": "cross-env AMBIENT_PERFIL_ENV=production nodemon -r tsconfig-paths/register src/server.ts",
-    "build": "tsc",
+    "build": "tsc && tsc-alias",
     "start": "node -r tsconfig-paths/register dist/server.js"
   },
   "keywords": [
@@ -28,6 +28,7 @@
     "nodemon": "^3.1.14",
     "supabase": "^2.98.2",
     "ts-node": "^10.9.2",
+    "tsc-alias": "^1.8.17",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^6.0.3"
   },
