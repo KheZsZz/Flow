@@ -1,76 +1,92 @@
+ALTER TABLE public.Orders DROP COLUMN IF EXISTS vehicle_id;
 
-CREATE OR REPLACE FUNCTION handle_order_status_auto()
-RETURNS TRIGGER AS $$
+CREATE TABLE IF NOT EXISTS public.OrderVehicles (
+    order_id UUID NOT NULL REFERENCES public.Orders(id) ON DELETE CASCADE,
+    vehicle_id UUID NOT NULL REFERENCES public.Vehicles(id) ON DELETE RESTRICT,
+    PRIMARY KEY (order_id, vehicle_id)
+);
+
+CREATE OR REPLACE FUNCTION public.create_order(
+    p_corporation_id UUID,
+    p_created_by UUID,
+    p_status_id UUID,
+    p_driver_id UUID,
+    p_delivery_date TIMESTAMPTZ,
+    p_notes TEXT,
+    p_vehicles UUID[], -- Array contendo os IDs de até 3 veículos/placas
+    p_items JSONB      -- Array JSON com os itens/invoices da ordem
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
 DECLARE
-  v_order_id        UUID;
-  v_corporation_id  UUID;
-  v_total           INT;
-  v_concluded       INT;
-  v_cancelled       INT;
-  v_in_progress     INT;
-  v_status_id       UUID;
-  v_status_code     INT;
+    v_order_id UUID;
+    v_item RECORD;
+    v_response JSONB;
 BEGIN
-  SELECT order_id INTO v_order_id
-  FROM Order_add_itens
-  WHERE order_item_id = NEW.id
-  LIMIT 1;
+    -- 1. Inserir a Ordem Principal
+    INSERT INTO public.Orders (
+        company_id,
+        driver_id,
+        status_id,
+        created_by,
+        created_at
+    )
+    VALUES (
+        p_corporation_id,
+        p_driver_id,
+        p_status_id,
+        p_created_by,
+        p_delivery_date  -- Usando a data de entrega informada ou ajustando conforme seu fluxo
+    )
+    RETURNING id INTO v_order_id;
 
-  IF v_order_id IS NULL THEN
-    RETURN NEW;
-  END IF;
+    -- 2. Vincular os Veículos (Armazena até 3 placas passadas no array)
+    IF p_vehicles IS NOT NULL AND array_length(p_vehicles, 1) > 0 THEN
+        INSERT INTO public.OrderVehicles (order_id, vehicle_id)
+        SELECT v_order_id, unnest(p_vehicles);
+    END IF;
 
-  SELECT company_id INTO v_corporation_id
-  FROM Orders WHERE id = v_order_id;
+    -- 3. Loop para ler os Itens do JSONB e inserir nas tabelas correspondentes
+    IF p_items IS NOT NULL AND jsonb_array_length(p_items) > 0 THEN
+        FOR v_item IN SELECT * FROM jsonb_to_recordset(p_items)
+            AS x(invoice_id UUID, type_orders public.OrderType, tracking VARCHAR(255), status_id UUID)
+        LOOP
+            -- Insere o Item da Ordem
+            INSERT INTO public.OrderItem (
+                company_id,
+                invoice_id,
+                type_orders,
+                tracking,
+                status_id,
+                created_by
+            )
+            VALUES (
+                p_corporation_id,
+                v_item.invoice_id,
+                v_item.type_orders,
+                v_item.tracking,
+                v_item.status_id,
+                p_created_by
+            );
 
-  SELECT
-    COUNT(*)                                                          AS total,
-    COUNT(*) FILTER (WHERE s.code = 102)                             AS concluded,
-    COUNT(*) FILTER (WHERE s.code = 103)                             AS cancelled,
-    COUNT(*) FILTER (WHERE s.code NOT IN (102, 103))                 AS in_progress
-  INTO v_total, v_concluded, v_cancelled, v_in_progress
-  FROM Order_add_itens oai
-  JOIN OrderItem oi ON oi.id = oai.order_item_id
-  JOIN Status s     ON s.id  = oi.status_id
-  WHERE oai.order_id = v_order_id;
+            -- Vincula na tabela de relacionamento se você utilizar a Order_add_itens
+            -- INSERT INTO public.Order_add_itens (order_id, order_item_id) VALUES (v_order_id, ...);
+        END LOOP;
+    END IF;
 
-  -- Define o novo status da ordem
-  v_status_code :=
-    CASE
-      WHEN v_total > 0 AND v_concluded = v_total                    THEN 102  -- todos concluídos
-      WHEN v_total > 0 AND v_cancelled = v_total                    THEN 103  -- todos cancelados
-      WHEN v_total > 0 AND v_concluded + v_cancelled = v_total      THEN 102  -- concluídos + cancelados = fecha
-      WHEN v_in_progress > 0                                        THEN 101  -- algum em andamento
-      ELSE NULL
-    END;
+    -- 4. Montar o retorno de sucesso
+    SELECT jsonb_build_object(
+        'order_id', v_order_id,
+        'message', 'Ordem de serviço gerada com sucesso!',
+        'vehicles_linked', array_length(p_vehicles, 1)
+    ) INTO v_response;
 
-  IF v_status_code IS NULL THEN
-    RETURN NEW;
-  END IF;
+    RETURN v_response;
 
-  -- Busca o UUID do status calculado
-  SELECT id INTO v_status_id
-  FROM Status
-  WHERE corporation_id = v_corporation_id
-    AND code = v_status_code
-  LIMIT 1;
-
-  IF v_status_id IS NULL THEN
-    RETURN NEW;
-  END IF;
-
-  -- Só atualiza se o status realmente mudou
-  UPDATE Orders
-  SET status_id = v_status_id
-  WHERE id = v_order_id
-    AND status_id IS DISTINCT FROM v_status_id;
-
-  RETURN NEW;
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE EXCEPTION 'Erro ao criar ordem: %', SQLERRM;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
-
-DROP TRIGGER IF EXISTS on_order_item_status_auto ON public.OrderItem;
-CREATE TRIGGER on_order_item_status_auto
-  AFTER UPDATE ON public.OrderItem
-  FOR EACH ROW
-  EXECUTE PROCEDURE handle_order_status_auto();
+$$;
