@@ -9,3 +9,4 @@ snippets
 .env.production
 pnpm-workspace.yaml
 pnpm-lock.yaml
+dist
