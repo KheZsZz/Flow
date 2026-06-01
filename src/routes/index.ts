@@ -11,6 +11,7 @@ import driverRoutes from "@/routes/driversRoutes";
 import fuelRoutes from "@/routes/fuelRoutes";
 import dashboardRouter from "@/routes/dashboardRouter";
 import invoiceRoutes from "@/routes/invoicesRoutes";
+import orderRoutes from "@/routes/orderRoutes";
 
 const router = express.Router();
 
@@ -66,5 +67,12 @@ router.use(
   authMiddleware.authUser,
   authMiddleware.reqCompany,
   invoiceRoutes,
+);
+
+router.use(
+  "/orders",
+  authMiddleware.authUser,
+  authMiddleware.reqCompany,
+  orderRoutes,
 );
 export default router;
