@@ -323,11 +323,14 @@ class UserController {
   }
 
   async me(req: AuthRequest, res: Response, next: NextFunction) {
+    const { data, error } = await supabaseAdmin
+      .from("users")
+      .select("*")
+      .eq("id", req.user?.id)
+      .single();
+
     return res.json({
-      id: req.user?.id,
-      email: req.user?.email,
-      profile: req.user?.user_metadata?.profile_user,
-      name: req.user?.user_metadata?.name_user,
+      user: data,
       company: req.company,
     });
   }
