@@ -42,4 +42,11 @@ router.get(
   userController.findAll,
 );
 
+router.get(
+  "/me",
+  authMiddleware.authUser,
+  authMiddleware.reqCompany,
+  userController.me,
+);
+
 export default router;

@@ -321,6 +321,16 @@ class UserController {
       next(error);
     }
   }
+
+  async me(req: AuthRequest, res: Response, next: NextFunction) {
+    return res.json({
+      id: req.user?.id,
+      email: req.user?.email,
+      profile: req.user?.user_metadata?.profile_user,
+      name: req.user?.user_metadata?.name_user,
+      company: req.company,
+    });
+  }
 }
 
 export const userController = new UserController();
