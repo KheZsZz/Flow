@@ -193,7 +193,7 @@ class InvoicesController {
       const { id } = req.params;
 
       const { data, error } = await supabaseAdmin
-        .from("Invoices")
+        .from("invoices")
         .select(
           `
           id,
@@ -238,7 +238,7 @@ class InvoicesController {
       const { nfe } = req.params;
 
       const { data, error } = await supabaseAdmin
-        .from("Invoices")
+        .from("invoices")
         .select("*")
         .eq("corporation_id", req.company.id)
         .eq("nfe", nfe)
@@ -264,7 +264,7 @@ class InvoicesController {
       const invoice = invoiceSchema.partial().parse(req.body);
 
       const { data, error } = await supabaseAdmin
-        .from("Invoices")
+        .from("invoices")
         .update({ ...invoice })
         .eq("id", id)
         .eq("corporation_id", req.company.id)
@@ -293,7 +293,7 @@ class InvoicesController {
       const { id } = req.params;
 
       const { data, error } = await supabaseAdmin
-        .from("Invoices")
+        .from("invoices")
         .delete()
         .eq("id", id)
         .eq("corporation_id", req.company.id)
