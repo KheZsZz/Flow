@@ -151,7 +151,7 @@ class InvoicesController {
       }
 
       const { data, error } = await supabaseAdmin
-        .from("Invoices")
+        .from("invoices")
         .select(
           `
           id,
