@@ -87,9 +87,6 @@ class InvoicesController {
   }
 
   async createFromXml(req: AuthRequest, res: Response, next: NextFunction) {
-    console.log("Headers:", req.headers["content-type"]);
-    console.log("File recebido:", req.file);
-    console.log("Body:", req.body);
     try {
       if (!req.company?.id || !req.user?.id) {
         return res.status(403).json({ error: "Company context not found" });
@@ -100,7 +97,21 @@ class InvoicesController {
           error: "Nenhum arquivo enviado ou o arquivo está vazio.",
         });
       }
+
       const extractedData = nfeParserService.parse(req.file.buffer);
+
+      const { data: existing } = await supabaseAdmin
+        .from("invoices")
+        .select("id")
+        .eq("barcode", extractedData.barcode)
+        .eq("corporation_id", req.company.id)
+        .maybeSingle();
+
+      if (existing) {
+        return res
+          .status(409)
+          .json({ error: "Nota fiscal já cadastrada no sistema." });
+      }
 
       const mailerId = await this.findOrCreateClient(
         extractedData.mailer,
