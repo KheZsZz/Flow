@@ -2,7 +2,21 @@ import express from "express";
 import multer from "multer";
 import { invoicesController } from "@/controllers/invoicesController";
 
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({
+  storage: multer.memoryStorage(),
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = [
+      "application/xml",
+      "text/xml",
+      "application/octet-stream", // alguns dispositivos enviam assim
+    ];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(null, true); // aceita tudo por agora, valida no controller
+    }
+  },
+});
 const router = express.Router();
 
 // No authMiddleware here — already applied in index.ts
