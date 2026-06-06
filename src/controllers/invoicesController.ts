@@ -87,6 +87,9 @@ class InvoicesController {
   }
 
   async createFromXml(req: AuthRequest, res: Response, next: NextFunction) {
+    console.log("Headers:", req.headers["content-type"]);
+    console.log("File recebido:", req.file);
+    console.log("Body:", req.body);
     try {
       if (!req.company?.id || !req.user?.id) {
         return res.status(403).json({ error: "Company context not found" });
