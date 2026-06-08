@@ -16,7 +16,8 @@ router.delete(
   vehicleController.delete,
 );
 router.get("/", vehicleController.findAll);
-router.get("/:plate", vehicleController.findByPlate);
+router.get("/:id", vehicleController.findById);
+router.get("/plate/:plate", vehicleController.findByPlate);
 router.patch(
   "/:id/status",
   authMiddleware.requireRole("Admin"),
