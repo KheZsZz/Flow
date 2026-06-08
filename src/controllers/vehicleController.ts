@@ -231,33 +231,31 @@ class VehicleController {
       const { plate } = req.params;
 
       if (!req.company?.id) {
-        return res
-          .status(403)
-          .json({ error: "Company context not found in request" });
+        return res.status(403).json({ error: "Company context not found" });
       }
 
-      const { data: vehicle, error: vehicleError } = await supabaseAdmin
+      const { data, error } = await supabaseAdmin
         .from("vehicles")
-        .select("id, make, model, year, type, license_plate, is_active")
+        .select(
+          `
+          id, make, model, year, type, license_plate, is_active,
+          vehicleowners!inner(corporation_id)
+        `,
+        )
         .eq("license_plate", plate)
+        .eq("vehicleowners.corporation_id", req.company.id)
         .single();
 
-      if (vehicleError || !vehicle) {
-        return res.status(404).json({ error: "Vehicle not found" });
+      if (error) {
+        if (error.code === "PGRST116") {
+          return res
+            .status(404)
+            .json({ error: "Vehicle not found or not authorized" });
+        }
+        throw error;
       }
 
-      const { data: owner, error: ownerError } = await supabaseAdmin
-        .from("vehicleowners")
-        .select("vehicle_id")
-        .eq("vehicle_id", vehicle.id)
-        .eq("corporation_id", req.company.id)
-        .single();
-
-      if (ownerError || !owner) {
-        return res
-          .status(403)
-          .json({ error: "Vehicle does not belong to your corporation" });
-      }
+      const { vehicleowners, ...vehicle } = data as any;
 
       return res.status(200).json(vehicle);
     } catch (error) {
