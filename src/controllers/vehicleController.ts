@@ -297,9 +297,15 @@ class VehicleController {
         .from("vehicles")
         .update({ is_active })
         .eq("id", id)
+        .select("*")
         .single();
 
-      if (vehicleError || !vehicle) {
+      if (vehicleError) {
+        console.error("Erro Supabase:", vehicleError);
+        return res.status(400).json({ error: vehicleError.message });
+      }
+
+      if (!vehicle) {
         return res.status(404).json({ error: "Vehicle not found" });
       }
 
