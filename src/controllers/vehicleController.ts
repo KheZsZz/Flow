@@ -6,7 +6,10 @@ import { vehicleSchema, VehicleType } from "@/schemas/vehicleSchema";
 class VehicleController {
   async create(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const vehicle = vehicleSchema.parse({ ...req.body, created_by: req.user?.id });
+      const vehicle = vehicleSchema.parse({
+        ...req.body,
+        created_by: req.user?.id,
+      });
 
       if (!req.company?.id || !req.user?.id) {
         return res
@@ -273,6 +276,31 @@ class VehicleController {
         return res
           .status(403)
           .json({ error: "Vehicle does not belong to your corporation" });
+      }
+
+      return res.status(200).json(vehicle);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async updateActiveStatus(
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const { id } = req.params;
+      const { is_active } = req.body;
+
+      const { data: vehicle, error: vehicleError } = await supabaseAdmin
+        .from("vehicles")
+        .update({ is_active })
+        .eq("id", id)
+        .single();
+
+      if (vehicleError || !vehicle) {
+        return res.status(404).json({ error: "Vehicle not found" });
       }
 
       return res.status(200).json(vehicle);

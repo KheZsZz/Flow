@@ -17,5 +17,10 @@ router.delete(
 );
 router.get("/", vehicleController.findAll);
 router.get("/:plate", vehicleController.findByPlate);
+router.patch(
+  "/:id/status",
+  authMiddleware.requireRole("Admin"),
+  vehicleController.updateActiveStatus,
+);
 
 export default router;
