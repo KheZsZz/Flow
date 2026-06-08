@@ -88,39 +88,20 @@ class VehicleController {
     try {
       const { id } = req.params;
 
-      if (!req.company?.id) {
-        return res
-          .status(403)
-          .json({ error: "Company context not found in request" });
-      }
-
-      const { data, error } = await supabaseAdmin
-        .from("vehicleowners")
-        .select(
-          `
-          vehicles!vehicle_id (
-            id,
-            make,
-            model,
-            year,
-            type,
-            license_plate,
-            is_active
-          )
-        `,
-        )
-        .eq("corporation_id", req.company.id)
-        .eq("vehicle_id", id)
+      const { data: vehicle, error } = await supabaseAdmin
+        .from("vehicles")
+        .select("*")
+        .eq("id", id)
+        .eq("corporation_id", req.company?.id)
         .single();
 
-      if (error) throw error;
-
-      const vehicle = (data as any).vehicles;
+      if (error) {
+        console.error("Erro na busca:", error);
+        throw error;
+      }
 
       if (!vehicle) {
-        return res
-          .status(404)
-          .json({ error: "Vehicle not found in your corporation" });
+        return res.status(404).json({ error: "Vehicle not found" });
       }
 
       return res.status(200).json(vehicle);
