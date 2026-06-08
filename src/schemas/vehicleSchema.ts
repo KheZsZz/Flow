@@ -6,30 +6,17 @@ export const vehicleSchema = z.object({
   id: z.string().uuid().optional(),
   make: z.string().min(1, "A marca é obrigatória").max(150),
   model: z.string().min(1, "O modelo é obrigatório").max(150),
-  year: z
-    .number()
-    .int()
-    .min(1900, "Ano inválido")
-    .max(new Date().getFullYear() + 1, "Ano inválido"),
+  year: z.coerce.number(),
   type: VehicleTypeSchema.default("Cavalo"),
-  capacity_fuel: z.number().optional(),
-  license_plate: z
-    .string()
-    .transform((val) => val.toUpperCase().replace(/\s|-/g, "")) // Transforma em maiúsculo e remove espaços ou hifens acidentais
-    .pipe(
-      z
-        .string()
-        .length(7, "A placa Mercosul deve ter exatamente 7 caracteres")
-        .refine(
-          (val) => {
-            const regexMercosul = /^[A-Z]{3}[0-9][A-Z][0-9]{2}$/;
-            return regexMercosul.test(val);
-          },
-          {
-            message: "Placa inválida. Use o formato Mercosul (Ex: ABC1D23)",
-          },
-        ),
-    ),
+  capacity_fuel: z.coerce.number(),
+  license_plate: z.string().refine(
+    (val) => {
+      const mercosul = /^[A-Z]{3}[0-9]{1}[A-Z]{1}[0-9]{2}$/;
+      const antigo = /^[A-Z]{3}[0-9]{4}$/;
+      return mercosul.test(val) || antigo.test(val);
+    },
+    { message: "Placa inválida. Use o formato Mercosul ou Padrão Antigo." },
+  ),
   is_active: z.boolean().default(true),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
@@ -61,9 +48,11 @@ export const FuelSchema = z
       .number()
       .nonnegative("O odômetro atual deve ser maior ou igual a zero"),
     is_full_tank: z.boolean().default(false),
-    date_fuel: z.coerce.date({
-      error: "Data de abastecimento inválida",
-    }).optional(),
+    date_fuel: z.coerce
+      .date({
+        error: "Data de abastecimento inválida",
+      })
+      .optional(),
     created_by: z.string().uuid("ID do criador inválido").optional(),
   })
   .transform((data) => {

@@ -3,7 +3,7 @@ import { blacklistedDomains, UserTypeSchema } from "@/schemas/enumSchema";
 
 export const UserSchema = z.object({
   id: z.string().uuid().optional(),
-
+  token: z.string().optional(),
   document_user: z
     .string()
     .transform((val) => val.replace(/\D/g, ""))
