@@ -3,6 +3,15 @@ import { XMLParser } from "fast-xml-parser";
 export interface NfeClientDetails {
   document: string;
   name: string;
+  address: {
+    street: string;
+    number: string;
+    complement: string;
+    neighborhood: string;
+    city: string;
+    state: string;
+    zip_code: string;
+  };
 }
 
 export interface ExtractedNfeData {
@@ -89,10 +98,28 @@ class NfeParserService {
       mailer: {
         document: cleanMailerDoc,
         name: emit?.xNome || "Remetente Não Identificado",
+        address: {
+          street: emit?.enderEmit?.xLgr || "",
+          number: emit?.enderEmit?.nro || "",
+          complement: emit?.enderEmit?.compl || "",
+          neighborhood: emit?.enderEmit?.xBairro || "",
+          city: emit?.enderEmit?.xMun || "",
+          state: emit?.enderEmit?.UF || "",
+          zip_code: emit?.enderEmit?.CEP || "",
+        },
       },
       recever: {
         document: cleanReceverDoc,
         name: dest?.xNome || "Destinatário Não Identificado",
+        address: {
+          street: dest?.enderDest?.xLgr || "",
+          number: dest?.enderDest?.nro || "",
+          complement: dest?.enderDest?.compl || "",
+          neighborhood: dest?.enderDest?.xBairro || "",
+          city: dest?.enderDest?.xMun || "",
+          state: dest?.enderDest?.UF || "",
+          zip_code: dest?.enderDest?.CEP || "",
+        },
       },
     };
   }

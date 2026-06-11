@@ -10,31 +10,31 @@ class InvoicesController {
     corporationId: string,
     userId: string,
   ): Promise<string> => {
-    const { data: existingClient, error: findError } = await supabaseAdmin
-      .from("clients")
-      .select("id")
-      .eq("corporation_id", corporationId)
-      .eq("document", clientData.document)
-      .maybeSingle();
+    const { data: clientId, error } = await supabaseAdmin.rpc(
+      "upsert_client_with_address",
+      {
+        p_corporation_id: corporationId,
+        p_user_id: userId,
+        p_document: clientData.document,
+        p_name: clientData.name,
+        p_address: {
+          street: clientData.address?.street || "",
+          number: clientData.address?.number || "S/N",
+          complement: clientData.address?.complement || "",
+          neighborhood: clientData.address?.neighborhood || "",
+          city: clientData.address?.city || "",
+          state: clientData.address?.state || "",
+          zip_code: clientData.address?.zip_code || "",
+        },
+      },
+    );
 
-    if (findError) throw findError;
-    if (existingClient) return existingClient.id;
+    if (error) {
+      console.error("Erro ao executar upsert_client_with_address:", error);
+      throw error;
+    }
 
-    const { data: newClient, error: insertError } = await supabaseAdmin
-      .from("clients")
-      .insert({
-        document: clientData.document,
-        name_client: clientData.name,
-        corporation_id: corporationId,
-        created_by: userId,
-        is_active: true,
-        // email, phone, password_client are now nullable — no fallback needed
-      })
-      .select("id")
-      .single();
-
-    if (insertError) throw insertError;
-    return newClient.id;
+    return clientId;
   };
 
   async create(req: AuthRequest, res: Response, next: NextFunction) {
@@ -184,8 +184,8 @@ class InvoicesController {
           xml_cte_url,
           created_at,
           updated_at,
-          remetente:clients!mailer_id ( id, name_client, document ),
-          destinatario:clients!recever_id ( id, name_client, document )
+          remetente:clients!mailer_id ( id, name_client, document, address:address_id (*) ),
+          destinatario:clients!recever_id ( id, name_client, document,address:address_id (*) )
         `,
         )
         .eq("corporation_id", req.company.id)
@@ -226,8 +226,8 @@ class InvoicesController {
           xml_cte_url,
           created_at,
           updated_at,
-          remetente:clients!mailer_id ( id, name_client, document ),
-          destinatario:clients!recever_id ( id, name_client, document )
+          remetente:clients!mailer_id ( id, name_client, document, phone, email, is_active,address:address_id (*) ),
+          destinatario:clients!recever_id ( id, name_client, document, phone, email, is_active,address:address_id (*) )
         `,
         )
         .eq("id", id)
@@ -253,7 +253,28 @@ class InvoicesController {
 
       const { data, error } = await supabaseAdmin
         .from("invoices")
-        .select("*")
+        .select(
+          `
+          id,
+          barcode,
+          nfe,
+          serie_nf,
+          cte,
+          cte_value,
+          value_nfe,
+          issue_date,
+          nature_transaction,
+          weight_brute,
+          quantity_volumes,
+          observation,
+          xml_nfe_url,
+          xml_cte_url,
+          created_at,
+          updated_at,
+          remetente:clients!mailer_id ( id, name_client, document, phone, email, is_active,address:address_id (*) ),
+          destinatario:clients!recever_id ( id, name_client, document, phone, email, is_active,address:address_id (*) )
+        `,
+        )
         .eq("corporation_id", req.company.id)
         .eq("nfe", nfe)
         .maybeSingle();
