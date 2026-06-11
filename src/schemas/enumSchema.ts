@@ -6,8 +6,7 @@ export const VehicleTypeSchema = z.enum([
   "Cavalo",
   "Van",
   "Vuc",
-  "Fiorino",
-  "Utilitário",
+  "Ultilitário",
 ]);
 
 export const UserTypeSchema = z.enum([
