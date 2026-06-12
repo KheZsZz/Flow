@@ -211,12 +211,13 @@ class ClientsController {
         return res.status(403).json({ error: "Company context not found" });
       }
       const { id } = req.params;
+      const { is_active } = req.body;
       if (!id) {
         return res.status(400).json({ error: "Id is required" });
       }
       const { data, error } = await supabaseAdmin
         .from("clients")
-        .update({ is_active: false })
+        .update({ is_active: is_active })
         .eq("corporation_id", req.company?.id)
         .eq("id", id)
         .select()
