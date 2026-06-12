@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { blacklistedDomains } from "./enumSchema";
+import { AddressSchema } from "./addressSchema";
 
 const validarCPF = (cpf: string) => {
   const cleanCpf = cpf.replace(/\D/g, "");
@@ -53,11 +54,11 @@ export const clientSchema = z.object({
     .transform((val) => val.replace(/\D/g, ""))
     .refine((val) => val.length === 11 || val.length === 14, {
       message: "O documento deve ter 11 dígitos (CPF) ou 14 dígitos (CNPJ)",
-    })
-    .refine((val) => (val.length === 11 ? validarCPF(val) : validarCNPJ(val)), {
-      message: "CPF ou CNPJ inválido",
     }),
-  name: z.string().min(1, "O nome é obrigatório").max(255),
+  // .refine((val) => (val.length === 11 ? validarCPF(val) : validarCNPJ(val)), {
+  //   message: "CPF ou CNPJ inválido",
+  // }),
+  name_client: z.string().min(1, "O nome é obrigatório").max(255),
   email: z
     .string()
     .trim()
@@ -72,18 +73,23 @@ export const clientSchema = z.object({
       {
         message: "Por favor, use um provedor de e-mail confiável",
       },
-    ),
-  phone_user: z
+    )
+    .optional(),
+  phone: z
     .string()
     .max(16, { message: "O telefone deve ter no máximo 16 caracteres" })
-    .regex(/^\(\d{2}\)\s\d\.\d{4}-\d{4}$/, {
-      message: "O telefone deve estar no formato (XX) 9.XXXX-XXXX",
-    }),
-  password: z
-    .string()
-    .min(6, "A senha deve ter no mínimo 6 caracteres")
-    .max(255),
+    //   .regex(/^\(\d{2}\)\s\d\.\d{4}-\d{4}$/, {
+    //     message: "O telefone deve estar no formato (XX) 9.XXXX-XXXX",
+    //   }),
+    // password: z
+    //   .string()
+    //   .min(6, "A senha deve ter no mínimo 6 caracteres")
+    .max(255)
+    .optional(),
+
   is_active: z.boolean().default(true),
+
+  address: AddressSchema,
 
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),

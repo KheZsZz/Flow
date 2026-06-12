@@ -4,8 +4,8 @@ import { clientSchema } from "@/schemas/clientsSchema";
 export const invoiceSchema = z.object({
   id: z.string().uuid().optional(),
 
-  mailer: clientSchema.shape.document,
-  recever: clientSchema.shape.document,
+  destinatario: clientSchema,
+  remetente: clientSchema,
 
   barcode: z
     .string()
@@ -43,8 +43,8 @@ export const invoiceSchema = z.object({
 
   observation: z.string().max(255).default(""),
 
-  xml_nfe_url: z.string().url().max(255).optional().nullable(),
-  xml_cte_url: z.string().url().max(255).optional().nullable(),
+  xml_nfe_url: z.string().url().max(255).optional(),
+  xml_cte_url: z.string().url().max(255).optional(),
 
   created_by: z.string().uuid("ID do criador inválido").optional(),
   created_at: z.coerce.date().optional(),
