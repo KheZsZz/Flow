@@ -4,8 +4,8 @@ import { clientSchema } from "@/schemas/clientsSchema";
 export const invoiceSchema = z.object({
   id: z.string().uuid().optional(),
 
-  destinatario: clientSchema,
-  remetente: clientSchema,
+  mailer: clientSchema,
+  recever: clientSchema,
 
   barcode: z
     .string()
