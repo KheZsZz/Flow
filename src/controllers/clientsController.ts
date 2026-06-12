@@ -24,9 +24,8 @@ class ClientsController {
   };
   private updateAddress = async (
     address: AddressTypes,
-    addressId?: string,
   ): Promise<AddressTypes | null> => {
-    if (!addressId) return null;
+    if (!address) return null;
 
     const { data, error } = await supabaseAdmin
       .from("addresses")
@@ -39,7 +38,7 @@ class ClientsController {
         number: address?.number || "S/N",
         complement: address?.complement || "",
       })
-      .eq("id", addressId);
+      .eq("id", address.id);
 
     if (error) throw error;
 
@@ -61,7 +60,7 @@ class ClientsController {
           email,
           phone,
           is_active,
-          address!address_id(*),
+          address!address_id(*)
         `,
         )
         .eq("corporation_id", req.company.id)
@@ -93,7 +92,7 @@ class ClientsController {
           email,
           phone,
           is_active,
-          address!address_id(*),
+          address!address_id(*)
         `,
         )
         .eq("corporation_id", req.company?.id)
@@ -126,7 +125,7 @@ class ClientsController {
           email,
           phone,
           is_active,
-          address!address_id(*),
+          address!address_id(*)
         `,
         )
         .eq("corporation_id", req.company?.id)
