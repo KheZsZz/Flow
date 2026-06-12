@@ -25,6 +25,7 @@ class ClientsController {
   private updateAddress = async (
     address: AddressTypes,
   ): Promise<AddressTypes | null> => {
+    console.log(address);
     if (!address) return null;
 
     const { data, error } = await supabaseAdmin
@@ -182,6 +183,8 @@ class ClientsController {
       const client = clientSchema.parse(req.body);
 
       const address = await this.updateAddress(client.address);
+
+      console.log(address);
 
       const { data, error } = await supabaseAdmin
         .from("clients")
