@@ -8,7 +8,7 @@ class ClientsController {
   private createdAddress = async (
     address: AddressTypes,
   ): Promise<AddressTypes | null> => {
-    const { data, error } = await supabaseAdmin.from("addresses").insert({
+    const { data, error } = await supabaseAdmin.from("address").insert({
       street: address?.street || "",
       neighborhood: address?.neighborhood || "",
       city: address?.city || "",
@@ -28,7 +28,7 @@ class ClientsController {
     if (!address) return null;
 
     const { data, error } = await supabaseAdmin
-      .from("addresses")
+      .from("address")
       .update({
         street: address?.street || "",
         neighborhood: address?.neighborhood || "",
