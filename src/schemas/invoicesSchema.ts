@@ -43,8 +43,20 @@ export const invoiceSchema = z.object({
 
   observation: z.string().max(255).default(""),
 
-  xml_nfe_url: z.string().url().max(255).optional(),
-  xml_cte_url: z.string().url().max(255).optional(),
+  xml_nfe_url: z
+    .string()
+    .url()
+    .or(z.literal(""))
+    .optional()
+    .nullable()
+    .default(""),
+  xml_cte_url: z
+    .string()
+    .url()
+    .or(z.literal(""))
+    .optional()
+    .nullable()
+    .default(""),
 
   created_by: z.string().uuid("ID do criador inválido").optional(),
   created_at: z.coerce.date().optional(),
