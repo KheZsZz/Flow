@@ -38,6 +38,7 @@ router.get(
 router.get(
   "/",
   authMiddleware.authUser,
+  authMiddleware.reqCompany,
   authMiddleware.requireRole("Admin"),
   userController.findAll,
 );
