@@ -6,6 +6,7 @@ import {
   UserSchema,
   LoginUserSchema,
   RegisterUserSchema,
+  UpdateUserSchema,
 } from "@/schemas/usersSchema";
 import { toE164 } from "@/utils/convert_phone";
 
@@ -102,7 +103,7 @@ class UserController {
         password_user,
         avatar_url,
         is_active,
-      } = UserSchema.parse(req.body);
+      } = UpdateUserSchema.parse(req.body);
 
       const { data: belongs, error: belongsError } = await supabaseAdmin
         .from("corporationusers")
@@ -171,8 +172,10 @@ class UserController {
           .status(403)
           .json({ error: "User does not belong to your corporation" });
 
-      const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(id);
-      await supabaseAdmin.auth.admin.updateUserById(id, {
+      const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(
+        id as string,
+      );
+      await supabaseAdmin.auth.admin.updateUserById(id as string, {
         user_metadata: { ...(authUser.user?.user_metadata ?? {}), is_active },
       });
 

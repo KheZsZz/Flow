@@ -102,6 +102,9 @@ export const LoginUserSchema = UserSchema.pick({
   password_user: true,
 });
 
+export const UpdateUserSchema = UserSchema.partial({ password_user: true });
+
+export type UpdateUserType = z.infer<typeof UpdateUserSchema>;
 export type RegisterUserType = z.infer<typeof RegisterUserSchema>;
 export type LoginUserType = z.infer<typeof LoginUserSchema>;
 export type UserType = z.infer<typeof UserSchema>;
