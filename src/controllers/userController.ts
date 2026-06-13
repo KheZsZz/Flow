@@ -209,9 +209,75 @@ class UserController {
 
   async findAll(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const { data, error } = await supabase.from("users").select("*");
+      const companyId = req.company?.id;
+
+      if (!companyId) {
+        return res
+          .status(400)
+          .json({ error: "Company context not found in request" });
+      }
+      const { data, error } = await supabase
+        .from("corporationusers")
+        .select(
+          `
+        users!manager_id (
+          id,
+          name_user,
+          password_user,
+          email_user,
+          phone_user,
+          is_active,
+          profile_user,
+        )
+      `,
+        )
+        .eq("corporation_id", companyId);
       if (error) throw error;
       res.status(200).json(data);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async findAllDrivers(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const companyId = req.company?.id;
+
+      if (!companyId) {
+        return res
+          .status(400)
+          .json({ error: "Company context not found in request" });
+      }
+
+      const { data, error } = await supabase
+        .from("corporationusers")
+        .select(
+          `
+          users!manager_id (
+            id,
+            name_user,
+            email_user,
+            phone_user,
+            is_active,
+            profile_user,
+            drivers!user_id (
+              cnh,
+              validade_cnh,
+              categoria_cnh,
+              mopp
+            )
+          )
+        `,
+        )
+        .eq("corporation_id", companyId);
+
+      if (error) throw error;
+
+      const drivers = data
+        .map((row) => row.users as any)
+        .filter((user) => user !== null && user.profile_user === "Driver");
+
+      return res.status(200).json(drivers);
     } catch (error) {
       next(error);
     }
@@ -297,50 +363,6 @@ class UserController {
       }
 
       return res.status(200).json(user);
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  async findAllDrivers(req: AuthRequest, res: Response, next: NextFunction) {
-    try {
-      const companyId = req.company?.id;
-
-      if (!companyId) {
-        return res
-          .status(400)
-          .json({ error: "Company context not found in request" });
-      }
-
-      const { data, error } = await supabase
-        .from("corporationusers")
-        .select(
-          `
-          users!manager_id (
-            id,
-            name_user,
-            email_user,
-            phone_user,
-            is_active,
-            profile_user,
-            drivers!user_id (
-              cnh,
-              validade_cnh,
-              categoria_cnh,
-              mopp
-            )
-          )
-        `,
-        )
-        .eq("corporation_id", companyId);
-
-      if (error) throw error;
-
-      const drivers = data
-        .map((row) => row.users as any)
-        .filter((user) => user !== null && user.profile_user === "Driver");
-
-      return res.status(200).json(drivers);
     } catch (error) {
       next(error);
     }

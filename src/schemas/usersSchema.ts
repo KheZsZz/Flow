@@ -84,9 +84,9 @@ export const UserSchema = z.object({
   created_by: z.string().uuid("ID do criador inválido").optional(),
   phone_user: z
     .string()
-    .max(16, { message: "O telefone deve ter no máximo 16 caracteres" })
-    .regex(/^\(\d{2}\)\s\d\.\d{4}-\d{4}$/, {
-      message: "O telefone deve estar no formato (XX) 9.XXXX-XXXX",
+    .max(11, { message: "O telefone deve ter no máximo 11 caracteres" })
+    .regex(/^[1-9]{2}9?[2-9][0-9]{7}$/, {
+      message: "O telefone deve estar no formato XX9XXXXXX",
     }),
   profile_user: UserTypeSchema.default("Commum").optional(),
   corporation_id: z.string().uuid().optional(),
