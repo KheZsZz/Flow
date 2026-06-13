@@ -22,5 +22,10 @@ router.delete("/items/:id", orderItemsController.delete);
 // -- Comprovantes
 // router.get("/items/:item_id/receipts", orderReceiptsController.findByItem);
 // router.post("/receipts", orderReceiptsController.create);
+//
+
+router.put("/:id", ordersController.update);
+
+router.post("/:id/baixar", ordersController.baixar);
 
 export default router;

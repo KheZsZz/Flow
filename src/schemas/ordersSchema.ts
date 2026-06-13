@@ -40,6 +40,18 @@ export const collectionSchema = z.object({
   status_id: z.string().uuid("ID do status inválido"),
 });
 
+export const updateOrderSchema = z.object({
+  driver_id: z.string().uuid("ID do motorista inválido").optional(),
+  notes: z.string().max(500).optional(),
+  delivery_date: z.coerce.date().optional(),
+  scheduled_start: z.coerce.date().optional(),
+  vehicles: z.array(orderVehicleSchema).optional(),
+  add_items: z.array(orderItemInputSchema).optional(),
+  remove_item_ids: z.array(z.string().uuid()).optional(),
+});
+
+export type UpdateOrderType = z.infer<typeof updateOrderSchema>;
+
 export type CreateOrderType = z.infer<typeof orderSchema>;
 export type OrderVehicleType = z.infer<typeof orderVehicleSchema>;
 export type OrderItemInputType = z.infer<typeof orderItemInputSchema>;

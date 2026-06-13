@@ -346,6 +346,34 @@ class InvoicesController {
       next(error);
     }
   }
+
+  async findByBarcode(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      if (!req.company?.id) {
+        return res.status(403).json({ error: "Company context not found" });
+      }
+      const { barcode } = req.params;
+
+      const { data, error } = await supabaseAdmin
+        .from("invoices")
+        .select(
+          `
+          id, barcode, nfe, serie_nf, value_nfe, weight_brute, issue_date,
+          remetente:clients!mailer_id ( id, name_client, document ),
+          destinatario:clients!recever_id ( id, name_client, document )
+          `,
+        )
+        .eq("corporation_id", req.company.id)
+        .eq("barcode", barcode)
+        .maybeSingle();
+
+      if (error) throw error;
+      if (!data) return res.status(404).json({ error: "Invoice not found" });
+      return res.status(200).json(data);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export const invoicesController = new InvoicesController();
