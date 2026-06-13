@@ -234,7 +234,12 @@ class UserController {
         )
         .eq("corporation_id", companyId);
       if (error) throw error;
-      res.status(200).json(data);
+      
+      const users = (data ?? [])
+        .map((row) => (row as any).users)
+        .filter((u) => u && u.id);
+        
+      res.status(200).json(users);
     } catch (error) {
       next(error);
     }
