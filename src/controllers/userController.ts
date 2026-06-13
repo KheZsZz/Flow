@@ -211,11 +211,11 @@ class UserController {
     try {
       const companyId = req.company?.id;
 
-      if (!companyId) {
-        return res
-          .status(400)
-          .json({ error: "Company context not found in request" });
-      }
+      // if (!companyId) {
+      //   return res
+      //     .status(400)
+      //     .json({ error: "Company context not found in request" });
+      // }
       const { data, error } = await supabase
         .from("corporationusers")
         .select(
