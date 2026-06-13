@@ -227,7 +227,7 @@ class UserController {
           email_user,
           phone_user,
           is_active,
-          profile_user,
+          profile_user
         )
       `,
         )
