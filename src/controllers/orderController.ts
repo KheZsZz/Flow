@@ -1,7 +1,7 @@
 import { NextFunction, Response } from "express";
 import { supabaseAdmin } from "@/config/supabase";
 import { AuthRequest } from "@/middleware/auth";
-import { orderSchema } from "@/schemas/ordersSchema";
+import { orderSchema, updateOrderSchema } from "@/schemas/ordersSchema";
 
 class OrdersController {
   async create(req: AuthRequest, res: Response, next: NextFunction) {
@@ -20,7 +20,7 @@ class OrdersController {
         p_delivery_date: body.delivery_date,
         p_scheduled_start: body.scheduled_start ?? null,
         p_notes: body.notes ?? null,
-        p_vehicles: body.vehicles, // [{ vehicle_id, role, position }]
+        p_vehicles: body.vehicles,
         p_items: body.items ?? [],
       });
 
@@ -59,7 +59,6 @@ class OrdersController {
           .json({ error: "Viagem finalizada não pode ser alterada" });
       }
 
-      // started = qualquer coisa além de "Em Aberto" (100)
       const started = statusCode !== 100;
       const wantsDriverOrVehicleChange =
         body.driver_id !== undefined || body.vehicles !== undefined;
@@ -72,7 +71,6 @@ class OrdersController {
         });
       }
 
-      // 1. campos diretos da ordem
       const orderPatch: Record<string, any> = { updated_at: new Date() };
       if (body.notes !== undefined) orderPatch.notes = body.notes;
       if (body.delivery_date !== undefined)
@@ -89,7 +87,6 @@ class OrdersController {
         .eq("company_id", req.company.id);
       if (updErr) throw updErr;
 
-      // 2. veículos (substitui a composição) — só se não iniciada
       if (!started && body.vehicles !== undefined) {
         await supabaseAdmin.from("ordervehicles").delete().eq("order_id", id);
         if (body.vehicles.length > 0) {
@@ -174,14 +171,13 @@ class OrdersController {
         return res.status(409).json({ error: "Viagem já finalizada" });
       }
 
-      // resolve o status Concluído (102) da empresa
-      const { data: statusDone, error: stErr } = await supabaseAdmin
+      const { data: statusDone, error: statusErrEmp } = await supabaseAdmin
         .from("status")
         .select("id")
         .eq("corporation_id", req.company.id)
         .eq("code", 102)
         .single();
-      if (stErr || !statusDone) {
+      if (statusErrEmp || !statusDone) {
         return res
           .status(500)
           .json({ error: "Status 'Concluído' (102) não configurado" });
@@ -197,7 +193,6 @@ class OrdersController {
         if (upErr) throw upErr;
       }
 
-      // devolve a ordem já atualizada (status pode ter virado Concluído)
       const { data: refreshed, error: refErr } = await supabaseAdmin
         .from("orders")
         .select(`id, finaled_at, status!status_id ( id, code, name )`)
@@ -274,6 +269,7 @@ class OrdersController {
 
       const { id } = req.params;
 
+      // caralho de SQL do inferno! NUnca Mecher aqui...
       const { data, error } = await supabaseAdmin
         .from("orders")
         .select(
@@ -373,10 +369,8 @@ class OrdersController {
       if (!req.company?.id) {
         return res.status(403).json({ error: "Company context not found" });
       }
-
       const { id } = req.params;
 
-      // Valida se a ordem existe e pertence à empresa
       const { data: order, error: findError } = await supabaseAdmin
         .from("orders")
         .select(

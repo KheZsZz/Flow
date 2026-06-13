@@ -13,6 +13,7 @@ export const orderItemInputSchema = z
     collection_id: z.string().uuid("ID da coleta inválido").optional(),
     type_orders: OrderTypeSchema,
     status_id: z.string().uuid("ID do status inválido"),
+    tracking: z.string().optional(),
   })
   .refine((d) => !!d.invoice_id !== !!d.collection_id, {
     message: "Informe invoice_id ou collection_id — não os dois",
@@ -25,6 +26,8 @@ export const orderSchema = z.object({
   notes: z.string().max(500).optional(),
   vehicles: z.array(orderVehicleSchema).min(1, "Informe ao menos um veículo"),
   items: z.array(orderItemInputSchema).optional(),
+  scheduled_start: z.coerce.date().optional(),
+  finaled_at: z.coerce.date().optional(),
 });
 
 export const updateOrderStatusSchema = z.object({
