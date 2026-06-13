@@ -21,7 +21,7 @@ router.patch(
   "/:id",
   authMiddleware.authUser,
   authMiddleware.requireRole("Admin"),
-  userController.disable,
+  userController.toggleActive,
 );
 router.delete(
   "/:id",

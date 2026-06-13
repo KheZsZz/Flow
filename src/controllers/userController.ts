@@ -155,15 +155,36 @@ class UserController {
     }
   }
 
-  async disable(req: AuthRequest, res: Response, next: NextFunction) {
+  async toggleActive(req: AuthRequest, res: Response, next: NextFunction) {
     const { id } = req.params;
+    const { is_active } = req.body;
+
     try {
-      const { data, error } = await supabase
+      const { data: belongs, error: belongsError } = await supabaseAdmin
+        .from("corporationusers")
+        .select("manager_id")
+        .eq("manager_id", id)
+        .eq("corporation_id", req.company?.id)
+        .single();
+      if (belongsError || !belongs)
+        return res
+          .status(403)
+          .json({ error: "User does not belong to your corporation" });
+
+      const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(id);
+      await supabaseAdmin.auth.admin.updateUserById(id, {
+        user_metadata: { ...(authUser.user?.user_metadata ?? {}), is_active },
+      });
+
+      const { data, error } = await supabaseAdmin
         .from("users")
-        .update({ is_active: false })
-        .eq("id", id);
+        .update({ is_active })
+        .eq("id", id)
+        .select("id, name_user, is_active")
+        .single();
       if (error) throw error;
-      res.status(200).json({ message: "User disabled successfully", data });
+
+      return res.status(200).json({ message: "Status atualizado", data });
     } catch (error) {
       next(error);
     }
