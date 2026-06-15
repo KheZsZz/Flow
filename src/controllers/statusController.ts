@@ -8,6 +8,7 @@ class statusController {
     try {
       const statusData = statusSchema.parse({
         ...req.body,
+        corporation_id: req.company?.id,
         created_by: req.user?.id,
       });
 
