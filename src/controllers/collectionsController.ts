@@ -31,13 +31,13 @@ class CollectionsController {
 
       const body = createCollectionSchema.parse(req.body);
 
-      let statusId = body.status.id;
+      let statusId = body.status_id;
       if (!statusId) {
         const { data: st, error: stErr } = await supabaseAdmin
           .from("status")
           .select("id")
           .eq("corporation_id", req.company.id)
-          .eq("code", body.status.code)
+          .eq("code", 100)
           .single();
         if (stErr || !st) {
           return res
