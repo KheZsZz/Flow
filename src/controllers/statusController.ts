@@ -72,7 +72,7 @@ class statusController {
       }
 
       const { data, error } = await supabase
-        .from("Status")
+        .from("status")
         .update({ ...statusUpdate })
         .eq("id", id)
         .eq("corporation_id", req.company?.id)
