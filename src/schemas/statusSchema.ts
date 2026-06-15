@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const statusSchema = z.object({
-  id: z.string().uuid().optional(),
+  id: z.string().uuid("ID do status invalido").optional(),
   code: z.number().min(1).max(999),
   name: z.string().min(1, "O nome é obrigatório").max(255),
   description: z.string().min(1, "A descrição é obrigatória").max(255),

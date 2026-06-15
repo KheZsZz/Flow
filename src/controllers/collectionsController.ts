@@ -12,8 +12,6 @@ const COLLECTION_SELECT = `
   description,
   scheduled_date,
   finaled_at,
-  quantity_volumes,
-  weight_brute,
   is_active,
   created_at,
   updated_at,
