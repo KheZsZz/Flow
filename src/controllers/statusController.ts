@@ -138,6 +138,31 @@ class statusController {
       next(error);
     }
   }
+
+  async findById(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params;
+
+      if (!req.company?.id) {
+        return res
+          .status(400)
+          .json({ error: "Company context not found in request" });
+      }
+
+      const { data, error } = await supabase
+        .from("status")
+        .select()
+        .eq("id", id)
+        .eq("corporation_id", req.company?.id)
+        .single();
+
+      if (error) throw error;
+
+      return res.status(200).json(data);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export const statusControllerInstance = new statusController();

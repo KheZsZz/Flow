@@ -11,6 +11,7 @@ router.post(
 );
 
 router.get("/", statusControllerInstance.findAll);
+router.get("/:id", statusControllerInstance.findById);
 
 router.get("/code/:code", statusControllerInstance.findByCode);
 
