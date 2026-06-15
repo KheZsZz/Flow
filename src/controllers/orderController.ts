@@ -1,7 +1,11 @@
 import { NextFunction, Response } from "express";
 import { supabaseAdmin } from "@/config/supabase";
 import { AuthRequest } from "@/middleware/auth";
-import { orderSchema, updateOrderSchema } from "@/schemas/ordersSchema";
+import {
+  orderSchema,
+  updateOrderSchema,
+  updateOrderStatusSchema,
+} from "@/schemas/ordersSchema";
 
 class OrdersController {
   async create(req: AuthRequest, res: Response, next: NextFunction) {
@@ -30,7 +34,6 @@ class OrdersController {
       next(error);
     }
   }
-
   async update(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.company?.id || !req.user?.id) {
@@ -144,7 +147,6 @@ class OrdersController {
       next(error);
     }
   }
-
   async baixar(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.company?.id) {
@@ -206,7 +208,6 @@ class OrdersController {
       next(error);
     }
   }
-
   async findAll(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.company?.id) {
@@ -218,7 +219,6 @@ class OrdersController {
         .select(
           `
           id,
-          type_orders,
           delivery_date,
           scheduled_start,
           finaled_at,
@@ -260,7 +260,6 @@ class OrdersController {
       next(error);
     }
   }
-
   async findById(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.company?.id) {
@@ -275,7 +274,6 @@ class OrdersController {
         .select(
           `
           id,
-          type_orders,
           delivery_date,
           notes,
           created_at,
@@ -331,7 +329,6 @@ class OrdersController {
       next(error);
     }
   }
-
   async updateStatus(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.company?.id) {
@@ -363,7 +360,6 @@ class OrdersController {
       next(error);
     }
   }
-
   async delete(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.company?.id) {
