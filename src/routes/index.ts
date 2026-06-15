@@ -13,6 +13,7 @@ import dashboardRouter from "@/routes/dashboardRouter";
 import invoiceRoutes from "@/routes/invoicesRoutes";
 import orderRoutes from "@/routes/orderRoutes";
 import clientsRoutes from "@/routes/clientsRoutes";
+import collectionsRoutes from "@/routes/collectionsRoutes";
 
 const router = express.Router();
 
@@ -82,5 +83,12 @@ router.use(
   authMiddleware.authUser,
   authMiddleware.reqCompany,
   clientsRoutes,
+);
+
+router.use(
+  "/collections",
+  authMiddleware.authUser,
+  authMiddleware.reqCompany,
+  collectionsRoutes,
 );
 export default router;
