@@ -6,12 +6,14 @@ import {
   updateCollectionSchema,
 } from "@/schemas/collectionsSchema";
 
-// Select reaproveitado em todas as respostas da coleta.
 const COLLECTION_SELECT = `
   id,
   code,
   description,
   scheduled_date,
+  finaled_at,
+  quantity_volumes,
+  weight_brute,
   is_active,
   created_at,
   updated_at,
@@ -21,7 +23,6 @@ const COLLECTION_SELECT = `
 `;
 
 class CollectionsController {
-  // POST /collections
   async create(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.company?.id || !req.user?.id) {
@@ -30,14 +31,13 @@ class CollectionsController {
 
       const body = createCollectionSchema.parse(req.body);
 
-      // status padrão = "Em Aberto" (code 100) da empresa, se não vier
-      let statusId = body.status_id;
+      let statusId = body.status.id;
       if (!statusId) {
         const { data: st, error: stErr } = await supabaseAdmin
           .from("status")
           .select("id")
           .eq("corporation_id", req.company.id)
-          .eq("code", 100)
+          .eq("code", body.status.code)
           .single();
         if (stErr || !st) {
           return res
