@@ -9,18 +9,21 @@ import {
 const COLLECTION_SELECT = `
   id,
   code,
+  collection_address,
+  quantity,
+  weight,
   description,
   scheduled_date,
-  finaled_at,
   is_active,
   created_at,
-  updated_at,
+  finaled_at,
   status!status_id ( id, code, name ),
   clients!client_id ( id, name_client, document, phone ),
   address!address_id ( id, street, neighborhood, city, state, zip_code )
 `;
 
 class CollectionsController {
+  // POST /collections
   async create(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.company?.id || !req.user?.id) {
@@ -29,6 +32,7 @@ class CollectionsController {
 
       const body = createCollectionSchema.parse(req.body);
 
+      // status padrão = "Em Aberto" (code 100) da empresa, se não vier
       let statusId = body.status_id;
       if (!statusId) {
         const { data: st, error: stErr } = await supabaseAdmin
@@ -50,7 +54,9 @@ class CollectionsController {
         .insert({
           corporation_id: req.company.id,
           client_id: body.client_id,
-          address_id: body.address_id ?? null,
+          collection_address: body.collection_address ?? null,
+          quantity: body.quantity ?? null,
+          weight: body.weight ?? null,
           description: body.description ?? null,
           scheduled_date: body.scheduled_date ?? null,
           status_id: statusId,
@@ -66,8 +72,6 @@ class CollectionsController {
     }
   }
 
-  // GET /collections            -> todas as coletas da empresa
-  // GET /collections?available  -> apenas as ainda não vinculadas a uma viagem
   async findAll(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.company?.id) {
@@ -161,7 +165,10 @@ class CollectionsController {
 
       const patch: Record<string, any> = {};
       if (body.client_id !== undefined) patch.client_id = body.client_id;
-      if (body.address_id !== undefined) patch.address_id = body.address_id;
+      if (body.collection_address !== undefined)
+        patch.collection_address = body.collection_address;
+      if (body.quantity !== undefined) patch.quantity = body.quantity;
+      if (body.weight !== undefined) patch.weight = body.weight;
       if (body.description !== undefined) patch.description = body.description;
       if (body.scheduled_date !== undefined)
         patch.scheduled_date = body.scheduled_date;
