@@ -19,11 +19,10 @@ export const UserTypeSchema = z.enum([
 ]);
 
 export const OrderTypeSchema = z.enum([
+  "Entrega/Coleta",
+  "Outros Estados",
+  "Retorno Vazio",
   "Coleta",
-  "Entrega",
-  "Devolução",
-  "Reentrega",
-  "Avarias",
 ]);
 
 export const blacklistedDomains = [

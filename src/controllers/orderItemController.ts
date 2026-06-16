@@ -70,7 +70,6 @@ class OrderItemsController {
 
       const { id } = req.params;
 
-      // Verifica se o item existe e se a ordem pai está em aberto
       const { data: link, error: findError } = await supabaseAdmin
         .from("order_add_itens")
         .select(

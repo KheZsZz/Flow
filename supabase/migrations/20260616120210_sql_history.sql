@@ -1,24 +1,4 @@
 
-alter table clients
-drop email_client,
-drop phone_client;
-
-ALTER TABLE Invoices
-  ALTER COLUMN weight_brute TYPE DECIMAL(10, 3) USING weight_brute::DECIMAL,
-  ALTER COLUMN quantity_volumes TYPE INTEGER USING quantity_volumes::INTEGER;
-
-
-
-ALTER TABLE address
-  ADD COLUMN IF NOT EXISTS number      VARCHAR(20),
-  ADD COLUMN IF NOT EXISTS complement  VARCHAR(255),
-  ADD COLUMN IF NOT EXISTS neighborhood VARCHAR(255);
-
-ALTER TABLE clients
-  ADD COLUMN IF NOT EXISTS address_id UUID REFERENCES address(id) ON DELETE SET NULL;
-
-
-
 create or replace function upsert_client_with_address(
   p_corporation_id uuid,
   p_user_id uuid,
@@ -63,26 +43,32 @@ begin
 end;
 $$ language plpgsql;
 
-rollback
-
-CREATE UNIQUE INDEX idx_unique_client_per_corporation
-ON clients (corporation_id, document);
 
 
+-- =====================================================================
+-- SYNC: colunas que podem não ter sido aplicadas no banco vivo.
+-- Seguro rodar mais de uma vez (ADD COLUMN IF NOT EXISTS).
+-- Destino: supabase/migrations/20260616090000_sync_colunas.sql
+--
+-- ATENÇÃO: isto cobre apenas COLUNAS. Se a migration 20260613124913_ordens.sql
+-- nunca rodou, ainda faltam: o enum public.OrderType, o status "Em Rota" (110),
+-- o job pg_cron (start_due_orders) e os triggers de finalização/trava.
+-- Verifique com `supabase migration list` e rode a 20260613 se faltar.
+-- =====================================================================
 
-ALTER TABLE public.Orders DROP COLUMN IF EXISTS vehicle_id;
+-- 1. OrderVehicles: role/position  (faltando -> erro 42703 na listagem)
+ALTER TABLE public.OrderVehicles
+  ADD COLUMN IF NOT EXISTS role     TEXT    NOT NULL DEFAULT 'Cavalo',
+  ADD COLUMN IF NOT EXISTS position INTEGER NOT NULL DEFAULT 1;
 
-CREATE TABLE IF NOT EXISTS public.OrderVehicles (
-    order_id   UUID NOT NULL REFERENCES public.Orders(id)   ON DELETE CASCADE,
-    vehicle_id UUID NOT NULL REFERENCES public.Vehicles(id) ON DELETE RESTRICT,
-    PRIMARY KEY (order_id, vehicle_id)
-);
+-- 2. Orders: datas de entrega e início agendado (Em Rota automático)
+ALTER TABLE public.Orders
+  ADD COLUMN IF NOT EXISTS delivery_date   TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS scheduled_start TIMESTAMPTZ;
 
-
-ALTER TABLE public.orderVe
-ADD CONSTRAINT fk_order
-FOREIGN KEY (order_id) REFERENCES public.orders(id);
-
-ALTER TABLE public.orderitem
-ADD CONSTRAINT fk_orderitem_collection
-FOREIGN KEY (collection_id) REFERENCES public.collections(id);
+-- 3. Collections: campos referenciados no COLLECTION_SELECT do controller
+ALTER TABLE public.Collections
+  ADD COLUMN IF NOT EXISTS quantity           INTEGER,
+  ADD COLUMN IF NOT EXISTS weight             NUMERIC(12,3),
+  ADD COLUMN IF NOT EXISTS collection_address TEXT,
+  ADD COLUMN IF NOT EXISTS finaled_at         TIMESTAMPTZ;
