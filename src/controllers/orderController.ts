@@ -304,8 +304,8 @@ class OrdersController {
               status!status_id ( id, code, name, description ),
               invoices!invoice_id (
                 id, nfe, serie_nf, value_nfe, weight_brute,
-                clients!mailer_id  ( id, name_client, document ),
-                clients!recever_id ( id, name_client, document )
+                remetente:clients!mailer_id  ( id, name_client, document ),
+                destinatario:clients!recever_id ( id, name_client, document )
               ),
               collections!collection_id ( id, code, description, scheduled_date ),
               orderreceipts ( id, url, created_at ),
