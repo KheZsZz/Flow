@@ -23,11 +23,11 @@ export const orderSchema = z.object({
   status_id: z.string().uuid("ID do status inválido"),
   driver_id: z.string().uuid("ID do motorista inválido"),
   delivery_date: z.coerce.date({ error: "Data de entrega inválida" }),
-  notes: z.string().max(500).optional(),
+  notes: z.string().max(500).nullish(),
   vehicles: z.array(orderVehicleSchema).min(1, "Informe ao menos um veículo"),
   items: z.array(orderItemInputSchema).optional(),
-  scheduled_start: z.coerce.date().optional(),
-  finaled_at: z.coerce.date().optional(),
+  scheduled_start: z.coerce.date().nullish(),
+  finaled_at: z.coerce.date().nullish(),
 });
 
 export const updateOrderStatusSchema = z.object({
@@ -45,9 +45,9 @@ export const collectionSchema = z.object({
 
 export const updateOrderSchema = z.object({
   driver_id: z.string().uuid("ID do motorista inválido").optional(),
-  notes: z.string().max(500).optional(),
+  notes: z.string().max(500).nullish(),
   delivery_date: z.coerce.date().optional(),
-  scheduled_start: z.coerce.date().optional(),
+  scheduled_start: z.coerce.date().nullish(),
   vehicles: z.array(orderVehicleSchema).optional(),
   add_items: z.array(orderItemInputSchema).optional(),
   remove_item_ids: z.array(z.string().uuid()).optional(),
