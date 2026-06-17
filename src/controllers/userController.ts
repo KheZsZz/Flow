@@ -234,11 +234,11 @@ class UserController {
         )
         .eq("corporation_id", companyId);
       if (error) throw error;
-      
+
       const users = (data ?? [])
         .map((row) => (row as any).users)
         .filter((u) => u && u.id);
-        
+
       res.status(200).json(users);
     } catch (error) {
       next(error);
@@ -267,6 +267,7 @@ class UserController {
             is_active,
             profile_user,
             drivers!user_id (
+              id,
               cnh,
               validade_cnh,
               categoria_cnh,
