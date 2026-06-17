@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { AuthRequest } from "@/middleware/auth";
 import { supabase, supabaseAdmin } from "@/config/supabase";
+import { driverPayloadSchema } from "@/schemas/driverSchema";
 import {
   LoginUserType,
   UserSchema,
@@ -41,14 +42,35 @@ class UserController {
 
       const { error: corpError } = await supabaseAdmin
         .from("corporationusers")
-        .insert({
-          corporation_id: req.company.id,
-          manager_id: data.user.id,
-        });
+        .insert({ corporation_id: req.company.id, manager_id: data.user.id });
 
       if (corpError) {
         await supabaseAdmin.auth.admin.deleteUser(data.user.id);
         throw corpError;
+      }
+
+      if (profile_user === "Driver") {
+        const driver = driverPayloadSchema.parse(req.body);
+        const { error: drvError } = await supabaseAdmin.from("drivers").insert({
+          user_id: data.user.id,
+          cnh: driver.cnh,
+          validade_cnh: driver.validade_cnh.toISOString().split("T")[0],
+          categoria_cnh: driver.categoria_cnh,
+          mopp: driver.mopp,
+          moop_validade: driver.moop_validade
+            ? driver.moop_validade.toISOString().split("T")[0]
+            : null,
+          created_by: req.user.id,
+        });
+        if (drvError) {
+          await supabaseAdmin
+            .from("corporationusers")
+            .delete()
+            .eq("manager_id", data.user.id)
+            .eq("corporation_id", req.company.id);
+          await supabaseAdmin.auth.admin.deleteUser(data.user.id);
+          throw drvError;
+        }
       }
 
       return res.status(201).json({
@@ -132,6 +154,56 @@ class UserController {
         if (authUpdateError) throw authUpdateError;
       }
 
+      const { data: drvRow } = await supabaseAdmin
+        .from("drivers")
+        .select("id")
+        .eq("user_id", id)
+        .maybeSingle();
+
+      if (profile_user === "Driver") {
+        const driver = driverPayloadSchema.parse(req.body);
+        const driverData = {
+          cnh: driver.cnh,
+          validade_cnh: driver.validade_cnh.toISOString().split("T")[0],
+          categoria_cnh: driver.categoria_cnh,
+          mopp: driver.mopp,
+          moop_validade: driver.moop_validade
+            ? driver.moop_validade.toISOString().split("T")[0]
+            : null,
+          updated_at: new Date().toISOString(),
+        };
+
+        if (drvRow) {
+          const { error } = await supabaseAdmin
+            .from("drivers")
+            .update(driverData)
+            .eq("id", drvRow.id);
+          if (error) throw error;
+        } else {
+          const { error } = await supabaseAdmin
+            .from("drivers")
+            .insert({ ...driverData, user_id: id, created_by: req.user?.id });
+          if (error) throw error;
+        }
+      } else if (drvRow) {
+        const { count, error: cErr } = await supabaseAdmin
+          .from("orders")
+          .select("id", { count: "exact", head: true })
+          .eq("driver_id", drvRow.id);
+        if (cErr) throw cErr;
+        if ((count ?? 0) > 0) {
+          return res.status(409).json({
+            error:
+              "Não é possível alterar o perfil: o motorista possui viagens vinculadas.",
+          });
+        }
+        const { error: delErr } = await supabaseAdmin
+          .from("drivers")
+          .delete()
+          .eq("id", drvRow.id);
+        if (delErr) throw delErr;
+      }
+
       const { data, error: dbError } = await supabase
         .from("users")
         .update({
@@ -198,7 +270,9 @@ class UserController {
     try {
       const { data, error } = await supabase
         .from("users")
-        .select("*")
+        .select(
+          `*, drivers!user_id ( id, cnh, validade_cnh, categoria_cnh, mopp, moop_validade )`,
+        )
         .eq("id", id);
       if (error) throw error;
       res.status(200).json(data);

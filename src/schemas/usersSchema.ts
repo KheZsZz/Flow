@@ -90,19 +90,49 @@ export const UserSchema = z.object({
     }),
   profile_user: UserTypeSchema.default("Commum").optional(),
   corporation_id: z.string().uuid().optional(),
+
+  cnh: z.string().trim().max(20).optional(),
+  validade_cnh: z.string().optional(), // ISO vindo do date input
+  categoria_cnh: z.array(z.enum(["A", "B", "C", "D", "E"])).optional(),
+  mopp: z.boolean().optional(),
+  moop_validade: z.string().nullish(), // sempre opcional
 });
+
+const requireDriverFields = (data: any, ctx: z.RefinementCtx) => {
+  if (data.profile_user !== "Driver") return;
+  if (!data.cnh?.trim())
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["cnh"],
+      message: "CNH é obrigatória para motoristas",
+    });
+  if (!data.validade_cnh)
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["validade_cnh"],
+      message: "Informe a validade da CNH",
+    });
+  if (!data.categoria_cnh || data.categoria_cnh.length === 0)
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["categoria_cnh"],
+      message: "Selecione ao menos uma categoria",
+    });
+};
 
 export const RegisterUserSchema = UserSchema.omit({
   id: true,
   is_active: true,
-});
+}).superRefine(requireDriverFields);
+
+export const UpdateUserSchema = UserSchema.partial({
+  password_user: true,
+}).superRefine(requireDriverFields);
 
 export const LoginUserSchema = UserSchema.pick({
   email_user: true,
   password_user: true,
 });
-
-export const UpdateUserSchema = UserSchema.partial({ password_user: true });
 
 export type UpdateUserType = z.infer<typeof UpdateUserSchema>;
 export type RegisterUserType = z.infer<typeof RegisterUserSchema>;
