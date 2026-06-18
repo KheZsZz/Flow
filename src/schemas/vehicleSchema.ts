@@ -18,6 +18,14 @@ export const vehicleSchema = z.object({
     { message: "Placa inválida. Use o formato Mercosul ou Padrão Antigo." },
   ),
   is_active: z.boolean().default(true),
+
+  // ─── Documentos (validades) ───────────────────────────────────
+  // .nullish() porque podem vir null do banco e ser opcionais no form.
+  crlv_validade: z.coerce.date().nullish(),
+  seguro_validade: z.coerce.date().nullish(),
+  antt_validade: z.coerce.date().nullish(),
+  tacografo_validade: z.coerce.date().nullish(),
+
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
   created_by: z.string().uuid("ID do criador inválido").optional(),

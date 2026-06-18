@@ -25,6 +25,17 @@ export const OrderTypeSchema = z.enum([
   "Coleta",
 ]);
 
+// ─── Metas (Goals) ──────────────────────────────────────────────
+// Mantém paridade 1:1 com o enum GoalMetric do banco.
+export const GoalMetricSchema = z.enum([
+  "entregas_concluidas",
+  "coletas_concluidas",
+  "ordens_criadas",
+  "notas_lancadas",
+]);
+
+export const GoalPeriodSchema = z.enum(["Diária", "Semanal", "Mensal"]);
+
 export const blacklistedDomains = [
   "tempmail.com",
   "mailinator.com",
@@ -43,3 +54,5 @@ export type FuelTypeEnum = z.infer<typeof FuelTypeShema>;
 export type OrderTypeEnum = z.infer<typeof OrderTypeSchema>;
 export type VehicleTypeEnum = z.infer<typeof VehicleTypeSchema>;
 export type UserTypeEnum = z.infer<typeof UserTypeSchema>;
+export type GoalMetricEnum = z.infer<typeof GoalMetricSchema>;
+export type GoalPeriodEnum = z.infer<typeof GoalPeriodSchema>;
