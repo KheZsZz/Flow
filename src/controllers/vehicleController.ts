@@ -3,6 +3,9 @@ import { AuthRequest } from "@/middleware/auth";
 import { supabase, supabaseAdmin } from "@/config/supabase";
 import { vehicleSchema, VehicleType } from "@/schemas/vehicleSchema";
 
+const toDateStr = (d?: Date | null) =>
+  d ? new Date(d).toISOString().split("T")[0] : null;
+
 class VehicleController {
   async create(req: AuthRequest, res: Response, next: NextFunction) {
     try {
@@ -17,9 +20,17 @@ class VehicleController {
           .json({ error: "Company context not found in request" });
       }
 
+      const payload = {
+        ...vehicle,
+        crlv_validade: toDateStr(vehicle.crlv_validade),
+        seguro_validade: toDateStr(vehicle.seguro_validade),
+        antt_validade: toDateStr(vehicle.antt_validade),
+        tacografo_validade: toDateStr(vehicle.tacografo_validade),
+      };
+
       const { data: newVehicle, error: vehicleError } = await supabaseAdmin
         .from("vehicles")
-        .insert(vehicle)
+        .insert(payload)
         .select("id")
         .single();
 
@@ -113,12 +124,20 @@ class VehicleController {
   async update(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
+      const vehicle = vehicleSchema.parse({ ...req.body, id });
 
       if (!req.company?.id) {
         return res
           .status(403)
           .json({ error: "Company context not found in request" });
       }
+      const payload = {
+        ...vehicle,
+        crlv_validade: toDateStr(vehicle.crlv_validade),
+        seguro_validade: toDateStr(vehicle.seguro_validade),
+        antt_validade: toDateStr(vehicle.antt_validade),
+        tacografo_validade: toDateStr(vehicle.tacografo_validade),
+      };
       const { data: owner, error: ownerError } = await supabaseAdmin
         .from("vehicleowners")
         .select("vehicle_id")
@@ -131,11 +150,10 @@ class VehicleController {
           .status(403)
           .json({ error: "Vehicle does not belong to your corporation" });
       }
-      const vehicle = vehicleSchema.parse({ ...req.body, id });
 
       const { data, error } = await supabaseAdmin
         .from("vehicles")
-        .update(vehicle)
+        .update(payload)
         .eq("id", id)
         .select()
         .single();
@@ -239,6 +257,7 @@ class VehicleController {
         .select(
           `
           id, make, model, year, type, license_plate, is_active,
+          crlv_validade, seguro_validade, antt_validade, tacografo_validade,
           vehicleowners!inner(corporation_id)
         `,
         )
