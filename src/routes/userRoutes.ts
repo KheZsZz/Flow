@@ -1,6 +1,7 @@
 import express from "express";
 import { authMiddleware } from "@/middleware/auth";
 import { userController } from "@/controllers/userController";
+import { upload } from "@/middleware/upload";
 
 const router = express.Router();
 
@@ -10,6 +11,16 @@ router.post(
   authMiddleware.reqCompany,
   userController.signUp,
 );
+
+// Self-service: o próprio usuário troca seu avatar (não exige Admin)
+router.post(
+  "/avatar",
+  authMiddleware.authUser,
+  authMiddleware.reqCompany,
+  upload.single("avatar"),
+  userController.uploadAvatar,
+);
+
 router.put(
   "/:id",
   authMiddleware.authUser,

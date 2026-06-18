@@ -2,13 +2,14 @@ import { Request, Response, NextFunction } from "express";
 import { AuthRequest } from "@/middleware/auth";
 import { supabase, supabaseAdmin } from "@/config/supabase";
 import { driverPayloadSchema } from "@/schemas/driverSchema";
+import { z } from "zod";
 import {
   LoginUserType,
-  UserSchema,
   LoginUserSchema,
   RegisterUserSchema,
   UpdateUserSchema,
 } from "@/schemas/usersSchema";
+import { logAudit } from "@/services/auditService";
 import { toE164 } from "@/utils/convert_phone";
 
 class UserController {
@@ -460,6 +461,90 @@ class UserController {
       user: data,
       company: req.company,
     });
+  }
+
+  async changePassword(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const schema = z.object({
+        current_password: z.string().min(1, "Senha atual obrigatória"),
+        new_password: z
+          .string()
+          .min(8, "A nova senha deve ter no mínimo 8 caracteres")
+          .refine((v) => /[A-Z]/.test(v), "Precisa de uma letra maiúscula")
+          .refine((v) => /\d/.test(v), "Precisa de um número"),
+      });
+      const { current_password, new_password } = schema.parse(req.body);
+
+      const email = req.user?.email;
+      if (!email || !req.user?.id) {
+        return res.status(401).json({ error: "User not authenticated" });
+      }
+
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password: current_password,
+      });
+      if (signInError) {
+        return res.status(401).json({ error: "Senha atual incorreta" });
+      }
+
+      const { error: updateError } =
+        await supabaseAdmin.auth.admin.updateUserById(req.user.id, {
+          password: new_password,
+        });
+      if (updateError) throw updateError;
+
+      await logAudit({
+        corporation_id: req.company?.id,
+        actor_id: req.user.id,
+        actor_name: req.user.user_metadata?.name_user ?? req.user.email,
+        action: "UPDATE",
+        entity: "users",
+        entity_id: req.user.id,
+        summary: "Alterou a própria senha",
+      });
+
+      return res.status(200).json({ message: "Senha alterada com sucesso" });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async uploadAvatar(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      if (!req.user?.id) {
+        return res.status(401).json({ error: "User not authenticated" });
+      }
+      const file = (req as any).file;
+      if (!file) {
+        return res.status(400).json({ error: "Arquivo 'avatar' não enviado" });
+      }
+
+      const ext = (file.originalname?.split(".").pop() || "jpg").toLowerCase();
+      const path = `${req.user.id}/${Date.now()}.${ext}`;
+
+      const { error: uploadError } = await supabaseAdmin.storage
+        .from("avatars")
+        .upload(path, file.buffer, {
+          contentType: file.mimetype,
+          upsert: true,
+        });
+      if (uploadError) throw uploadError;
+
+      const {
+        data: { publicUrl },
+      } = supabaseAdmin.storage.from("avatars").getPublicUrl(path);
+
+      const { error: dbError } = await supabaseAdmin
+        .from("users")
+        .update({ avatar_url: publicUrl, updated_at: new Date().toISOString() })
+        .eq("id", req.user.id);
+      if (dbError) throw dbError;
+
+      return res.status(200).json({ avatar_url: publicUrl });
+    } catch (error) {
+      next(error);
+    }
   }
 }
 

@@ -14,6 +14,9 @@ import invoiceRoutes from "@/routes/invoicesRoutes";
 import orderRoutes from "@/routes/orderRoutes";
 import clientsRoutes from "@/routes/clientsRoutes";
 import collectionsRoutes from "@/routes/collectionsRoutes";
+import goalsRoutes from "@/routes/goalsRoutes";
+import alertsRoutes from "@/routes/alertsRoutes";
+import auditRoutes from "@/routes/auditRoutes";
 
 const router = express.Router();
 
@@ -91,4 +94,29 @@ router.use(
   authMiddleware.reqCompany,
   collectionsRoutes,
 );
+
+router.use(
+  "/goals",
+  authMiddleware.authUser,
+  authMiddleware.reqCompany,
+  authMiddleware.requireRole("Admin"),
+  goalsRoutes,
+);
+
+router.use(
+  "/alerts",
+  authMiddleware.authUser,
+  authMiddleware.reqCompany,
+  authMiddleware.requireRole("Admin"),
+  alertsRoutes,
+);
+
+router.use(
+  "/audit",
+  authMiddleware.authUser,
+  authMiddleware.reqCompany,
+  authMiddleware.requireRole("Admin"),
+  auditRoutes,
+);
+
 export default router;

@@ -13,4 +13,11 @@ router.get(
   userController.me,
 );
 
+router.put(
+  "/change-password",
+  authMiddleware.authUser,
+  authMiddleware.reqCompany,
+  userController.changePassword,
+);
+
 export default router;
