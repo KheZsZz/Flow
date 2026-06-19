@@ -7,24 +7,32 @@ export const errorHandler = (
   res: Response,
   next: NextFunction,
 ) => {
+  // ── Validação (Zod) ────────────────────────────────────────────────
   if (err instanceof ZodError) {
-    console.log(err);
+    const errors = err.issues.map((e) => ({
+      field: e.path.join("."),
+      message: e.message,
+    }));
+    const first = errors[0];
+
     return res.status(400).json({
       status: "validation_error",
-      message: "Os dados enviados são inválidos.",
-      errors: err.issues.map((e) => ({
-        field: e.path.join("."),
-        message: e.message,
-      })),
+      code: "VALIDATION_ERROR",
+      // message já vem específica (campo: motivo) p/ clientes que só leem message
+      message: first
+        ? `${first.field ? first.field + ": " : ""}${first.message}`
+        : "Os dados enviados são inválidos.",
+      errors, // lista completa p/ o front detalhar
     });
   }
 
+  // ── Erros do Postgres (códigos SQLSTATE) ──────────────────────────
   if (err.code) {
-    console.log(err);
     switch (err.code) {
       case "23505":
         return res.status(409).json({
           status: "conflict",
+          code: "DB_UNIQUE_VIOLATION",
           message: "Este registro já existe no sistema.",
           detail: err.detail || undefined,
         });
@@ -32,19 +40,29 @@ export const errorHandler = (
       case "22P02":
         return res.status(400).json({
           status: "bad_request",
+          code: "DB_INVALID_INPUT",
           message:
             "O formato do identificador (ID) ou dado enviado é inválido.",
         });
 
       case "23503":
-        return res.status(404).json({
-          status: "not_found",
+        return res.status(409).json({
+          status: "conflict",
+          code: "DB_FK_VIOLATION",
           message:
-            "O registro pai associado não foi encontrado (relação inválida).",
+            "Este registro está vinculado a outros e não pode ser alterado/removido.",
+        });
+
+      case "23502":
+        return res.status(400).json({
+          status: "bad_request",
+          code: "DB_NOT_NULL_VIOLATION",
+          message: "Um campo obrigatório não foi preenchido.",
         });
     }
   }
 
+  // ── Autenticação ──────────────────────────────────────────────────
   const isAuthError =
     err.status === 401 ||
     err.name === "AuthApiError" ||
@@ -52,36 +70,22 @@ export const errorHandler = (
     err.message?.toLowerCase().includes("unauthorized") ||
     err.message?.toLowerCase().includes("jwt");
 
-  console.log(isAuthError);
-
   if (isAuthError) {
-    console.log(isAuthError);
     return res.status(401).json({
       status: "unauthorized",
+      code: "UNAUTHORIZED",
       message: err.message || "Acesso não autorizado.",
     });
   }
 
   const statusCode = err.status || err.statusCode || 500;
 
-  if (statusCode === 404) {
-    return res.status(404).json({
-      status: "not_found",
-      message: err.message || "Recurso não encontrado.",
-    });
-  }
-
-  if (statusCode === 405) {
-    return res.status(405).json({
-      status: "method_not_allowed",
-      message: err.message || "Método HTTP não permitido para esta rota.",
-    });
-  }
-
-  if (statusCode === 409) {
-    return res.status(409).json({
-      status: "conflict",
-      message: err.message || "Houve um conflito na requisição.",
+  if (statusCode >= 500) {
+    console.error("[errorHandler]", {
+      path: req.originalUrl,
+      method: req.method,
+      message: err?.message,
+      stack: err?.stack,
     });
   }
 
