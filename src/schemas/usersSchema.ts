@@ -52,26 +52,26 @@ export const UserSchema = z.object({
     })
     .refine((val) => /\d/.test(val), {
       message: "A senha deve conter pelo menos um número.",
-    })
-    .refine(
-      (val) => {
-        const matches = val.match(/\d{2}/g);
-        if (!matches) return true;
+    }),
+  // .refine(
+  //   (val) => {
+  //     const matches = val.match(/\d{2}/g);
+  //     if (!matches) return true;
 
-        for (const pair of matches) {
-          const num1 = parseInt(pair[0], 10);
-          const num2 = parseInt(pair[1], 10);
+  //     for (const pair of matches) {
+  //       const num1 = parseInt(pair[0], 10);
+  //       const num2 = parseInt(pair[1], 10);
 
-          if (num2 === num1 + 1) {
-            return false;
-          }
-        }
-        return true;
-      },
-      {
-        message: "A senha não pode conter números em sequência (ex: 12, 45).",
-      },
-    ),
+  //       if (num2 === num1 + 1) {
+  //         return false;
+  //       }
+  //     }
+  //     return true;
+  //   },
+  //   {
+  //     message: "A senha não pode conter números em sequência (ex: 12, 45).",
+  //   },
+  // ),
 
   avatar_url: z
     .string()
