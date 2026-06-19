@@ -22,8 +22,21 @@ const COLLECTION_SELECT = `
   address!address_id ( id, street, neighborhood, city, state, zip_code )
 `;
 
+async function isLinkedToOrder(
+  companyId: string,
+  collectionId: string,
+): Promise<boolean> {
+  const { data, error } = await supabaseAdmin
+    .from("orderitem")
+    .select("id")
+    .eq("company_id", companyId)
+    .eq("collection_id", collectionId)
+    .limit(1);
+  if (error) throw error;
+  return (data?.length ?? 0) > 0;
+}
+
 class CollectionsController {
-  // POST /collections
   async create(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.company?.id || !req.user?.id) {
@@ -32,7 +45,6 @@ class CollectionsController {
 
       const body = createCollectionSchema.parse(req.body);
 
-      // status padrão = "Em Aberto" (code 100) da empresa, se não vier
       let statusId = body.status_id;
       if (!statusId) {
         const { data: st, error: stErr } = await supabaseAdmin
@@ -80,40 +92,41 @@ class CollectionsController {
 
       const available = req.query.available === "true";
 
-      let query = supabaseAdmin
+      const { data, error } = await supabaseAdmin
         .from("collections")
         .select(COLLECTION_SELECT)
         .eq("corporation_id", req.company.id)
         .order("created_at", { ascending: false });
+      if (error) throw error;
+
+      // coletas já vinculadas a algum item de viagem
+      const { data: used, error: usedErr } = await supabaseAdmin
+        .from("orderitem")
+        .select("collection_id")
+        .eq("company_id", req.company.id)
+        .not("collection_id", "is", null);
+      if (usedErr) throw usedErr;
+
+      const usedIds = new Set(
+        (used ?? []).map((r: any) => r.collection_id).filter(Boolean),
+      );
+
+      // anexa in_order a cada linha -> a UI sabe se pode excluir/alterar
+      let rows = (data ?? []).map((c: any) => ({
+        ...c,
+        in_order: usedIds.has(c.id),
+      }));
 
       if (available) {
-        // coletas já vinculadas a algum item de viagem
-        const { data: used, error: usedErr } = await supabaseAdmin
-          .from("orderitem")
-          .select("collection_id")
-          .eq("company_id", req.company.id)
-          .not("collection_id", "is", null);
-        if (usedErr) throw usedErr;
-
-        const usedIds = (used ?? [])
-          .map((r: any) => r.collection_id)
-          .filter(Boolean);
-
-        if (usedIds.length > 0) {
-          query = query.not("id", "in", `(${usedIds.join(",")})`);
-        }
-        query = query.eq("is_active", true);
+        rows = rows.filter((c: any) => c.is_active && !c.in_order);
       }
 
-      const { data, error } = await query;
-      if (error) throw error;
-      return res.status(200).json(data ?? []);
+      return res.status(200).json(rows);
     } catch (error) {
       next(error);
     }
   }
 
-  // GET /collections/:id
   async findById(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.company?.id) {
@@ -132,13 +145,14 @@ class CollectionsController {
       if (!data) {
         return res.status(404).json({ error: "Coleta não encontrada" });
       }
-      return res.status(200).json(data);
+
+      const in_order = await isLinkedToOrder(req.company.id, id);
+      return res.status(200).json({ ...data, in_order });
     } catch (error) {
       next(error);
     }
   }
 
-  // PUT /collections/:id
   async update(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.company?.id) {
@@ -147,7 +161,6 @@ class CollectionsController {
       const { id } = req.params;
       const body = updateCollectionSchema.parse(req.body);
 
-      // trava: coleta concluída (code 102) não é editável
       const { data: current, error: curErr } = await supabaseAdmin
         .from("collections")
         .select(`id, status!status_id ( code )`)
@@ -157,6 +170,15 @@ class CollectionsController {
       if (curErr || !current) {
         return res.status(404).json({ error: "Coleta não encontrada" });
       }
+
+      // trava (Tópico 3): coleta vinculada a uma viagem não pode ser alterada
+      if (await isLinkedToOrder(req.company.id, id)) {
+        return res.status(409).json({
+          error: "Coleta vinculada a uma viagem não pode ser alterada.",
+        });
+      }
+
+      // trava: coleta concluída (code 102) não é editável
       if ((current as any).status?.code === 102) {
         return res
           .status(409)
@@ -189,7 +211,6 @@ class CollectionsController {
     }
   }
 
-  // PATCH /collections/:id   -> ativar/inativar  { is_active: boolean }
   async disable(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.company?.id) {
@@ -214,6 +235,42 @@ class CollectionsController {
 
       if (error) throw error;
       return res.status(200).json(data);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async delete(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      if (!req.company?.id) {
+        return res.status(403).json({ error: "Company context not found" });
+      }
+      const { id } = req.params;
+
+      const { data: current, error: curErr } = await supabaseAdmin
+        .from("collections")
+        .select("id")
+        .eq("corporation_id", req.company.id)
+        .eq("id", id)
+        .single();
+      if (curErr || !current) {
+        return res.status(404).json({ error: "Coleta não encontrada" });
+      }
+
+      if (await isLinkedToOrder(req.company.id, id as string)) {
+        return res.status(409).json({
+          error: "Coleta vinculada a uma viagem não pode ser excluída.",
+        });
+      }
+
+      const { error } = await supabaseAdmin
+        .from("collections")
+        .delete()
+        .eq("corporation_id", req.company.id)
+        .eq("id", id);
+      if (error) throw error;
+
+      return res.status(200).json({ message: "Coleta excluída com sucesso" });
     } catch (error) {
       next(error);
     }
