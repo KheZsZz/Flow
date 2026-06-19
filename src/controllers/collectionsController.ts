@@ -146,7 +146,7 @@ class CollectionsController {
         return res.status(404).json({ error: "Coleta não encontrada" });
       }
 
-      const in_order = await isLinkedToOrder(req.company.id, id);
+      const in_order = await isLinkedToOrder(req.company.id, id as string);
       return res.status(200).json({ ...data, in_order });
     } catch (error) {
       next(error);
@@ -172,7 +172,7 @@ class CollectionsController {
       }
 
       // trava (Tópico 3): coleta vinculada a uma viagem não pode ser alterada
-      if (await isLinkedToOrder(req.company.id, id)) {
+      if (await isLinkedToOrder(req.company.id, id as string)) {
         return res.status(409).json({
           error: "Coleta vinculada a uma viagem não pode ser alterada.",
         });
