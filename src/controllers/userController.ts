@@ -494,15 +494,22 @@ class UserController {
         });
       if (updateError) throw updateError;
 
-      await logAudit({
-        corporation_id: req.company?.id,
-        actor_id: req.user.id,
-        actor_name: req.user.user_metadata?.name_user ?? req.user.email,
-        action: "UPDATE",
-        entity: "users",
-        entity_id: req.user.id,
-        summary: "Alterou a própria senha",
-      });
+      try {
+        await logAudit({
+          corporation_id: req.company?.id,
+          actor_id: req.user.id,
+          actor_name: req.user.user_metadata?.name_user ?? req.user.email,
+          action: "UPDATE",
+          entity: "users",
+          entity_id: req.user.id,
+          summary: "Alterou a própria senha",
+        });
+      } catch (auditErr) {
+        console.error(
+          "[changePassword] auditoria falhou (ignorado):",
+          auditErr,
+        );
+      }
 
       return res.status(200).json({ message: "Senha alterada com sucesso" });
     } catch (error) {
