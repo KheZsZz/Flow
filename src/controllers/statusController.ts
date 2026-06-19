@@ -1,7 +1,7 @@
-import { Request, Response, NextFunction } from "express";
+import { Response, NextFunction } from "express";
 import { supabase } from "@/config/supabase";
 import { AuthRequest } from "@/middleware/auth";
-import { statusSchema, StatusTypes } from "@/schemas/statusSchema";
+import { statusSchema } from "@/schemas/statusSchema";
 
 class statusController {
   async create(req: AuthRequest, res: Response, next: NextFunction) {
@@ -43,12 +43,17 @@ class statusController {
           .json({ error: "Company context not found in request" });
       }
 
-      const { data, error } = await supabase
+      const activeOnly = req.query.active === "true";
+
+      let query = supabase
         .from("status")
-        .select("id, code, name, description")
+        .select("id, code, name, description, is_active")
         .eq("corporation_id", req.company?.id)
         .order("code", { ascending: true });
 
+      if (activeOnly) query = query.eq("is_active", true);
+
+      const { data, error } = await query;
       if (error) throw error;
 
       return res.status(200).json(data || []);
@@ -90,25 +95,36 @@ class statusController {
     }
   }
 
-  async delete(req: AuthRequest, res: Response, next: NextFunction) {
+  async disable(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
+      const { is_active } = req.body;
 
       if (!req.company?.id) {
         return res
           .status(400)
           .json({ error: "Company context not found in request" });
       }
+      if (typeof is_active !== "boolean") {
+        return res
+          .status(400)
+          .json({ error: "is_active (boolean) é obrigatório" });
+      }
 
-      const { error, count } = await supabase
-        .from("Status")
-        .delete({ count: "exact" })
+      const { data, error } = await supabase
+        .from("status")
+        .update({ is_active, updated_at: new Date().toISOString() })
         .eq("id", id)
-        .eq("corporation_id", req.company?.id);
+        .eq("corporation_id", req.company?.id)
+        .select("id, code, name, description, is_active")
+        .single();
 
       if (error) throw error;
 
-      return res.status(200).json({ message: "Status deleted successfully" });
+      return res.status(200).json({
+        message: is_active ? "Status ativado" : "Status inativado",
+        data,
+      });
     } catch (error) {
       next(error);
     }

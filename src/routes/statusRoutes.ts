@@ -12,7 +12,6 @@ router.post(
 
 router.get("/", statusControllerInstance.findAll);
 router.get("/:id", statusControllerInstance.findById);
-
 router.get("/code/:code", statusControllerInstance.findByCode);
 
 router.put(
@@ -21,10 +20,11 @@ router.put(
   statusControllerInstance.update,
 );
 
-router.delete(
+// Status nunca é excluído — apenas inativado/ativado.
+router.patch(
   "/:id",
   authMiddleware.requireRole("Admin"),
-  statusControllerInstance.delete,
+  statusControllerInstance.disable,
 );
 
 export default router;
