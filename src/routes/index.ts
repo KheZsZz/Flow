@@ -1,5 +1,6 @@
 import express from "express";
 import { authMiddleware } from "@/middleware/auth";
+import { auditMiddleware } from "@/middleware/audit";
 
 import authRoutes from "@/routes/authRoutes";
 import corporateRoutes from "@/routes/corporateRoutes";
@@ -20,6 +21,7 @@ import auditRoutes from "@/routes/auditRoutes";
 
 const router = express.Router();
 
+router.use(auditMiddleware);
 router.use("/auth", authRoutes);
 router.use("/users", userRoutes);
 router.use("/corporate", corporateRoutes);

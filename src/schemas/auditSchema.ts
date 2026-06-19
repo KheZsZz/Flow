@@ -33,6 +33,8 @@ export const AUDIT_ENTITY_LABELS: Record<string, string> = {
   collections: "Coletas",
   invoices: "Notas Fiscais",
   clients: "Clientes",
+  status: "Status",
+  fuel: "Abastecimento",
   goals: "Metas",
 };
 
