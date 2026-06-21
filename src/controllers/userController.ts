@@ -451,16 +451,22 @@ class UserController {
   }
 
   async me(req: AuthRequest, res: Response, next: NextFunction) {
-    const { data, error } = await supabaseAdmin
-      .from("users")
-      .select("*")
-      .eq("id", req.user?.id)
-      .single();
+    try {
+      const { data, error } = await supabaseAdmin
+        .from("users")
+        .select("*")
+        .eq("id", req.user?.id)
+        .maybeSingle();
 
-    return res.json({
-      user: data,
-      company: req.company,
-    });
+      if (error) throw error;
+      if (!data) {
+        return res.status(404).json({ error: "Usuário não encontrado" });
+      }
+
+      return res.json({ user: data, company: req.company });
+    } catch (error) {
+      next(error);
+    }
   }
 
   async changePassword(req: AuthRequest, res: Response, next: NextFunction) {
