@@ -184,6 +184,9 @@ class InvoicesController {
           xml_cte_url,
           created_at,
           updated_at,
+          comprovante_url,
+          comprovante_uploaded_at,
+          delivered_at,
           remetente:clients!mailer_id ( id, name_client, document, address:address_id (*) ),
           destinatario:clients!recever_id ( id, name_client, document,address:address_id (*) )
         `,
@@ -191,8 +194,18 @@ class InvoicesController {
         .eq("corporation_id", req.company.id)
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
-      return res.status(200).json(data);
+if (error) throw error;
+
+      const rows = (data ?? []).map((inv: any) => ({
+        ...inv,
+        delivery_status: inv.comprovante_url
+          ? "finalizada"
+          : inv.delivered_at
+            ? "aguardando_comprovante"
+            : null,
+      }));
+
+      return res.status(200).json(rows);
     } catch (error) {
       next(error);
     }
@@ -370,6 +383,63 @@ class InvoicesController {
       if (error) throw error;
       if (!data) return res.status(404).json({ error: "Invoice not found" });
       return res.status(200).json(data);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // POST /invoices/:id/comprovante  (multipart, campo "comprovante")
+  async uploadComprovante(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      if (!req.company?.id) {
+        return res.status(403).json({ error: "Company context not found" });
+      }
+      const { id } = req.params;
+      const file = (req as any).file;
+      if (!file) {
+        return res
+          .status(400)
+          .json({ error: "Arquivo 'comprovante' não enviado" });
+      }
+
+      const { data: inv, error: invErr } = await supabaseAdmin
+        .from("invoices")
+        .select("id")
+        .eq("id", id)
+        .eq("corporation_id", req.company.id)
+        .maybeSingle();
+      if (invErr) throw invErr;
+      if (!inv) return res.status(404).json({ error: "Nota não encontrada" });
+
+      const ext = (file.originalname?.split(".").pop() || "jpg").toLowerCase();
+      const path = `${req.company.id}/${id}/${Date.now()}.${ext}`;
+
+      const { error: upErr } = await supabaseAdmin.storage
+        .from("comprovantes")
+        .upload(path, file.buffer, {
+          contentType: file.mimetype,
+          upsert: true,
+        });
+      if (upErr) throw upErr;
+
+      const {
+        data: { publicUrl },
+      } = supabaseAdmin.storage.from("comprovantes").getPublicUrl(path);
+
+      const { data, error } = await supabaseAdmin
+        .from("invoices")
+        .update({
+          comprovante_url: publicUrl,
+          comprovante_uploaded_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", id)
+        .eq("corporation_id", req.company.id)
+        .select("id, comprovante_url, comprovante_uploaded_at, delivered_at")
+        .single();
+      if (error) throw error;
+
+      return res.status(200).json({ ...data, delivery_status: "finalizada" });
     } catch (error) {
       next(error);
     }

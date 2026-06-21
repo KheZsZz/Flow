@@ -36,4 +36,10 @@ router.post(
   upload.single("xml"),
   invoicesController.createFromXml.bind(invoicesController),
 );
+
+router.post(
+  "/:id/comprovante",
+  upload.single("comprovante"),
+  invoicesController.uploadComprovante,
+);
 export default router;
