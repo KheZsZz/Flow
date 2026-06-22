@@ -258,6 +258,7 @@ class VehicleController {
           `
           id, make, model, year, type, license_plate, is_active,
           crlv_validade, seguro_validade, antt_validade, tacografo_validade,
+          crlv_doc_url, seguro_doc_url, tacografo_doc_url,
           vehicleowners!inner(corporation_id)
         `,
         )

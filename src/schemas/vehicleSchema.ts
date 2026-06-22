@@ -20,11 +20,15 @@ export const vehicleSchema = z.object({
   is_active: z.boolean().default(true),
 
   // ─── Documentos (validades) ───────────────────────────────────
-  // .nullish() porque podem vir null do banco e ser opcionais no form.
   crlv_validade: z.coerce.date().nullish(),
   seguro_validade: z.coerce.date().nullish(),
   antt_validade: z.coerce.date().nullish(),
   tacografo_validade: z.coerce.date().nullish(),
+
+  // ─── Documentos (arquivos enviados) ──────────────────────────
+  crlv_doc_url: z.string().url().nullish(),
+  seguro_doc_url: z.string().url().nullish(),
+  tacografo_doc_url: z.string().url().nullish(),
 
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),

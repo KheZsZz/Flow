@@ -61,6 +61,8 @@ class UserController {
           moop_validade: driver.moop_validade
             ? driver.moop_validade.toISOString().split("T")[0]
             : null,
+          cnh_doc_url: driver.cnh_doc_url ?? null,
+          mopp_doc_url: driver.mopp_doc_url ?? null,
           created_by: req.user.id,
         });
         if (drvError) {
@@ -163,7 +165,7 @@ class UserController {
 
       if (profile_user === "Driver") {
         const driver = driverPayloadSchema.parse(req.body);
-        const driverData = {
+        const driverData: any = {
           cnh: driver.cnh,
           validade_cnh: driver.validade_cnh.toISOString().split("T")[0],
           categoria_cnh: driver.categoria_cnh,
@@ -171,6 +173,8 @@ class UserController {
           moop_validade: driver.moop_validade
             ? driver.moop_validade.toISOString().split("T")[0]
             : null,
+          cnh_doc_url: driver.cnh_doc_url ?? null,
+          mopp_doc_url: driver.mopp_doc_url ?? null,
           updated_at: new Date().toISOString(),
         };
 
@@ -272,7 +276,7 @@ class UserController {
       const { data, error } = await supabase
         .from("users")
         .select(
-          `*, drivers!user_id ( id, cnh, validade_cnh, categoria_cnh, mopp, moop_validade )`,
+          `*, drivers!user_id ( id, cnh, validade_cnh, categoria_cnh, mopp, moop_validade, cnh_doc_url, mopp_doc_url )`,
         )
         .eq("id", id);
       if (error) throw error;
@@ -346,7 +350,9 @@ class UserController {
               cnh,
               validade_cnh,
               categoria_cnh,
-              mopp
+              mopp,
+              cnh_doc_url,
+              mopp_doc_url
             )
           )
         `,
@@ -425,13 +431,15 @@ class UserController {
               cnh,
               validade_cnh,
               categoria_cnh,
-              mopp
+              mopp,
+              cnh_doc_url,
+              mopp_doc_url
             )
           )
         `,
         )
         .eq("corporation_id", req.company?.id)
-        .eq("manager_id", id) // ← filtra o motorista pelo id da rota
+        .eq("manager_id", id)
         .single();
 
       if (error) throw error;

@@ -18,6 +18,7 @@ import collectionsRoutes from "@/routes/collectionsRoutes";
 import goalsRoutes from "@/routes/goalsRoutes";
 import alertsRoutes from "@/routes/alertsRoutes";
 import auditRoutes from "@/routes/auditRoutes";
+import uploadRoutes from "@/routes/uploadRoutes";
 
 const router = express.Router();
 
@@ -119,6 +120,13 @@ router.use(
   authMiddleware.reqCompany,
   authMiddleware.requireRole("Admin"),
   auditRoutes,
+);
+
+router.use(
+  "/upload",
+  authMiddleware.authUser,
+  authMiddleware.reqCompany,
+  uploadRoutes,
 );
 
 export default router;
