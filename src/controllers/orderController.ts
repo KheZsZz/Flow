@@ -125,7 +125,8 @@ class OrdersController {
             .from("orderitem")
             .insert({
               company_id: req.company.id,
-              invoice_id: it.invoice_id,
+              invoice_id: it.invoice_id ?? null,
+              collection_id: it.collection_id ?? null, // ← faltando
               type_orders: it.type_orders,
               tracking: it.tracking ?? null,
               status_id: it.status_id,
