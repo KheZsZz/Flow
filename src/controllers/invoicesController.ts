@@ -163,16 +163,30 @@ class InvoicesController {
       if (!req.company?.id) {
         return res.status(403).json({ error: "Company context not found" });
       }
-
       const { data, error } = await supabaseAdmin
         .from("vw_invoices_delivery")
         .select(
           `
-          id, barcode, nfe, serie_nf, cte, cte_value, value_nfe, issue_date,
-          nature_transaction, weight_brute, quantity_volumes, observation,
-          xml_nfe_url, xml_cte_url, created_at, updated_at,
-          comprovante_url, comprovante_uploaded_at, delivered_at,
-          delivery_status,                     // ← novo, vem da view
+          id,
+          barcode,
+          nfe,
+          serie_nf,
+          cte,
+          cte_value,
+          value_nfe,
+          issue_date,
+          nature_transaction,
+          weight_brute,
+          quantity_volumes,
+          observation,
+          xml_nfe_url,
+          xml_cte_url,
+          created_at,
+          updated_at,
+          comprovante_url,
+          comprovante_uploaded_at,
+          delivered_at,
+          delivery_status,
           remetente:clients!mailer_id ( id, name_client, document, address:address_id (*) ),
           destinatario:clients!recever_id ( id, name_client, document, address:address_id (*) )
           `,
