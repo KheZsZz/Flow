@@ -201,7 +201,6 @@ class InvoicesController {
       next(error);
     }
   }
-
   async findById(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.company?.id) {
