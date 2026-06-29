@@ -165,47 +165,24 @@ class InvoicesController {
       }
 
       const { data, error } = await supabaseAdmin
-        .from("invoices")
+        .from("vw_invoices_delivery")
         .select(
           `
-          id,
-          barcode,
-          nfe,
-          serie_nf,
-          cte,
-          cte_value,
-          value_nfe,
-          issue_date,
-          nature_transaction,
-          weight_brute,
-          quantity_volumes,
-          observation,
-          xml_nfe_url,
-          xml_cte_url,
-          created_at,
-          updated_at,
-          comprovante_url,
-          comprovante_uploaded_at,
-          delivered_at,
+          id, barcode, nfe, serie_nf, cte, cte_value, value_nfe, issue_date,
+          nature_transaction, weight_brute, quantity_volumes, observation,
+          xml_nfe_url, xml_cte_url, created_at, updated_at,
+          comprovante_url, comprovante_uploaded_at, delivered_at,
+          delivery_status,                     // ← novo, vem da view
           remetente:clients!mailer_id ( id, name_client, document, address:address_id (*) ),
-          destinatario:clients!recever_id ( id, name_client, document,address:address_id (*) )
-        `,
+          destinatario:clients!recever_id ( id, name_client, document, address:address_id (*) )
+          `,
         )
         .eq("corporation_id", req.company.id)
         .order("created_at", { ascending: false });
 
-if (error) throw error;
+      if (error) throw error;
 
-      const rows = (data ?? []).map((inv: any) => ({
-        ...inv,
-        delivery_status: inv.comprovante_url
-          ? "finalizada"
-          : inv.delivered_at
-            ? "aguardando_comprovante"
-            : null,
-      }));
-
-      return res.status(200).json(rows);
+      return res.status(200).json(data ?? []);
     } catch (error) {
       next(error);
     }
