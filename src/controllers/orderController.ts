@@ -185,8 +185,24 @@ class OrdersController {
           .status(500)
           .json({ error: "Status 'Concluído' (102) não configurado" });
       }
+      const { data: targets, error: targetsErr } = await supabaseAdmin
+        .from("orderitem")
+        .select(`id, status!status_id ( code )`)
+        .in("id", itemIds)
+        .eq("company_id", req.company.id);
+      if (targetsErr) throw targetsErr;
 
-      // atualiza um a um para disparar o trigger de finalização
+      const found = targets ?? [];
+      const notReady = found.filter((it: any) => it.status?.code !== 200);
+      if (found.length !== itemIds.length || notReady.length > 0) {
+        return res.status(409).json({
+          error:
+            "Só é possível baixar itens em 'Aguardando Canhoto' (200). " +
+            "Conclua antes as etapas de entrega/coleta.",
+          invalid_item_ids: notReady.map((it: any) => it.id),
+        });
+      }
+
       for (const itemId of itemIds) {
         const { error: upErr } = await supabaseAdmin
           .from("orderitem")

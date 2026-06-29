@@ -29,9 +29,7 @@ class OrderItemsController {
 
       const { data, error } = await supabaseAdmin
         .from("orderitem")
-        .update({
-          status_id,
-        })
+        .update({ status_id })
         .eq("id", id)
         .eq("company_id", req.company.id)
         .select(
@@ -44,7 +42,12 @@ class OrderItemsController {
         )
         .single();
 
-      if (error) throw error;
+      if (error) {
+        if ((error as any).code === "P0001") {
+          return res.status(409).json({ error: (error as any).message });
+        }
+        throw error;
+      }
 
       if (location_item) {
         await supabaseAdmin
