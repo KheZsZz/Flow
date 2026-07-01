@@ -440,11 +440,9 @@ class OrdersController {
       if ((order as any).finaled_at)
         return res.status(409).json({ error: "Viagem já finalizada" });
       if ((order as any).status?.code !== 100)
-        return res
-          .status(409)
-          .json({
-            error: "Só é possível iniciar viagens em 'Em aberto' (100).",
-          });
+        return res.status(409).json({
+          error: "Só é possível iniciar viagens em 'Em aberto' (100).",
+        });
 
       const { data: statuses, error: stErr } = await supabaseAdmin
         .from("status")
@@ -467,7 +465,7 @@ class OrdersController {
 
       await supabaseAdmin
         .from("orderstatushistory")
-        .insert({ order_id: id, status_id: s110.id, changed_by: req.user.id });
+        .insert({ order_id: id, status_id: s110.id, changed_by: req.user?.id });
 
       const { data: links } = await supabaseAdmin
         .from("order_add_itens")
