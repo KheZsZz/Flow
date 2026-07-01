@@ -10,10 +10,7 @@ class OrderReceiptsController {
       if (!req.company?.id) {
         return res.status(403).json({ error: "Company context not found" });
       }
-      const userId = req.user?.id;
-      if (!userId) {
-        return res.status(403).json({ error: "Usuário não autenticado" });
-      }
+
       const { item_id } = req.params;
       const file = (req as any).file;
       if (!file) {
@@ -59,8 +56,9 @@ class OrderReceiptsController {
           company_id: req.company.id,
           order_item_id: item_id,
           url: publicUrl,
-          created_by: userId,
+          created_by: req.user?.id,
         });
+
       if (recErr) throw recErr;
 
       if ((item as any).invoice_id) {
@@ -104,6 +102,7 @@ class OrderReceiptsController {
       next(error);
     }
   }
+
   async findByItem(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.company?.id) {
