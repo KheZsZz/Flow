@@ -25,7 +25,7 @@ router.put("/:id", ordersController.update);
 router.post("/:id/baixar", ordersController.baixar);
 router.get("/items/:item_id/tracking", trackingEventsController.findByItem);
 router.post("/:id/start", ordersController.start);
-
+router.post("/:id/concluir", ordersController.concluir);
 router.get("/items/:item_id/receipts", orderReceiptsController.findByItem);
 router.post(
   "/items/:item_id/comprovante",
