@@ -26,7 +26,9 @@ export const orderSchema = z.object({
   notes: z.string().max(500).nullish(),
   vehicles: z.array(orderVehicleSchema).min(1, "Informe ao menos um veículo"),
   items: z.array(orderItemInputSchema).optional(),
-  scheduled_start: z.coerce.date().nullish(),
+  scheduled_start: z.coerce.date({
+    error: "Informe a data/hora de início da viagem",
+  }),
   finaled_at: z.coerce.date().nullish(),
 });
 

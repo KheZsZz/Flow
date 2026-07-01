@@ -422,6 +422,78 @@ class OrdersController {
       next(error);
     }
   }
+  async start(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      if (!req.company?.id) {
+        return res.status(403).json({ error: "Company context not found" });
+      }
+      const { id } = req.params;
+
+      const { data: order, error: findErr } = await supabaseAdmin
+        .from("orders")
+        .select(`id, finaled_at, status!status_id ( code )`)
+        .eq("id", id)
+        .eq("company_id", req.company.id)
+        .single();
+      if (findErr || !order)
+        return res.status(404).json({ error: "Order not found" });
+      if ((order as any).finaled_at)
+        return res.status(409).json({ error: "Viagem já finalizada" });
+      if ((order as any).status?.code !== 100)
+        return res
+          .status(409)
+          .json({
+            error: "Só é possível iniciar viagens em 'Em aberto' (100).",
+          });
+
+      const { data: statuses, error: stErr } = await supabaseAdmin
+        .from("status")
+        .select("id, code")
+        .eq("corporation_id", req.company.id)
+        .in("code", [100, 110]);
+      if (stErr) throw stErr;
+      const s100 = statuses?.find((s: any) => s.code === 100);
+      const s110 = statuses?.find((s: any) => s.code === 110);
+      if (!s110)
+        return res
+          .status(500)
+          .json({ error: "Status 'Em Rota' (110) não configurado" });
+
+      await supabaseAdmin
+        .from("orders")
+        .update({ status_id: s110.id, updated_at: new Date() })
+        .eq("id", id)
+        .eq("company_id", req.company.id);
+
+      await supabaseAdmin
+        .from("orderstatushistory")
+        .insert({ order_id: id, status_id: s110.id, changed_by: req.user.id });
+
+      const { data: links } = await supabaseAdmin
+        .from("order_add_itens")
+        .select("order_item_id")
+        .eq("order_id", id);
+      const itemIds = (links ?? []).map((l: any) => l.order_item_id);
+      if (itemIds.length && s100) {
+        await supabaseAdmin
+          .from("orderitem")
+          .update({ status_id: s110.id, updated_at: new Date() })
+          .in("id", itemIds)
+          .eq("company_id", req.company.id)
+          .eq("status_id", s100.id);
+      }
+
+      const { data: refreshed } = await supabaseAdmin
+        .from("orders")
+        .select(`id, tracking, finaled_at, status!status_id ( id, code, name )`)
+        .eq("id", id)
+        .eq("company_id", req.company.id)
+        .single();
+      return res.status(200).json(refreshed);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export const ordersController = new OrdersController();
