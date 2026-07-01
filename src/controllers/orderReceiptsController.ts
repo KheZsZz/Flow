@@ -1,4 +1,3 @@
-// src/controllers/orderReceiptsController.ts
 import { Response, NextFunction } from "express";
 import { supabaseAdmin } from "@/config/supabase";
 import { AuthRequest } from "@/middleware/auth";
@@ -6,12 +5,14 @@ import { AuthRequest } from "@/middleware/auth";
 const BUCKET = "comprovantes";
 
 class OrderReceiptsController {
-  // POST /orders/items/:item_id/comprovante  (multipart, campo "comprovante")
-  // Envia o canhoto, registra em OrderReceipts e conclui o item (200 -> 102).
   async uploadComprovante(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.company?.id) {
         return res.status(403).json({ error: "Company context not found" });
+      }
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(403).json({ error: "Usuário não autenticado" });
       }
       const { item_id } = req.params;
       const file = (req as any).file;
@@ -21,7 +22,6 @@ class OrderReceiptsController {
           .json({ error: "Arquivo 'comprovante' não enviado" });
       }
 
-      // item + status atual + origem (nota/coleta)
       const { data: item, error: itemErr } = await supabaseAdmin
         .from("orderitem")
         .select(`id, invoice_id, collection_id, status!status_id ( code )`)
@@ -35,13 +35,11 @@ class OrderReceiptsController {
       const code = (item as any).status?.code;
       if (code !== 200) {
         return res.status(409).json({
-          error:
-            "O canhoto só pode ser enviado em 'Aguardando Canhoto' (200).",
+          error: "O canhoto só pode ser enviado em 'Aguardando Canhoto' (200).",
           current_status_code: code,
         });
       }
 
-      // upload no Storage
       const ext = (file.originalname?.split(".").pop() || "jpg").toLowerCase();
       const path = `${req.company.id}/${item_id}/${Date.now()}.${ext}`;
       const { error: upErr } = await supabaseAdmin.storage
@@ -55,18 +53,16 @@ class OrderReceiptsController {
         data: { publicUrl },
       } = supabaseAdmin.storage.from(BUCKET).getPublicUrl(path);
 
-      // registra o comprovante do item
       const { error: recErr } = await supabaseAdmin
         .from("orderreceipts")
         .insert({
           company_id: req.company.id,
           order_item_id: item_id,
           url: publicUrl,
-          created_by: req.user.id,
+          created_by: userId,
         });
       if (recErr) throw recErr;
 
-      // se for nota, espelha no invoice (mantém a lista de notas coerente)
       if ((item as any).invoice_id) {
         await supabaseAdmin
           .from("invoices")
@@ -79,7 +75,6 @@ class OrderReceiptsController {
           .eq("corporation_id", req.company.id);
       }
 
-      // conclui o item: 200 -> 102 (guard permite; dispara finalize + propagação)
       const { data: s102, error: stErr } = await supabaseAdmin
         .from("status")
         .select("id")
@@ -109,8 +104,6 @@ class OrderReceiptsController {
       next(error);
     }
   }
-
-  // GET /orders/items/:item_id/receipts
   async findByItem(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       if (!req.company?.id) {
