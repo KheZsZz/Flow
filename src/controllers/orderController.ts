@@ -236,6 +236,7 @@ class OrdersController {
         .select(
           `
           id,
+          tracking,
           delivery_date,
           scheduled_start,
           finaled_at,
