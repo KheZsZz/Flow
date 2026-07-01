@@ -492,6 +492,102 @@ class OrdersController {
       next(error);
     }
   }
+  async concluir(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      if (!req.company?.id) {
+        return res.status(403).json({ error: "Company context not found" });
+      }
+      const { id } = req.params;
+      const bodyIds: string[] | undefined = req.body?.item_ids;
+
+      const { data: order, error: findErr } = await supabaseAdmin
+        .from("orders")
+        .select("id, finaled_at")
+        .eq("id", id)
+        .eq("company_id", req.company.id)
+        .single();
+      if (findErr || !order)
+        return res.status(404).json({ error: "Order not found" });
+      if ((order as any).finaled_at)
+        return res.status(409).json({ error: "Viagem já finalizada" });
+
+      const { data: st, error: stErr } = await supabaseAdmin
+        .from("status")
+        .select("id, code")
+        .eq("corporation_id", req.company.id)
+        .in("code", [110, 111, 112, 113, 102]);
+      if (stErr) throw stErr;
+      const byCode = (c: number) =>
+        st?.find((s: any) => s.code === c)?.id as string | undefined;
+      const s110 = byCode(110),
+        s111 = byCode(111),
+        s112 = byCode(112),
+        s113 = byCode(113),
+        s102 = byCode(102);
+      if (!s110 || !s111 || !s112 || !s113 || !s102)
+        return res
+          .status(500)
+          .json({ error: "Status da cadeia de rastreio não configurados" });
+
+      const { data: links } = await supabaseAdmin
+        .from("order_add_itens")
+        .select("order_item_id")
+        .eq("order_id", id);
+      let itemIds = (links ?? []).map((l: any) => l.order_item_id);
+      if (Array.isArray(bodyIds) && bodyIds.length)
+        itemIds = itemIds.filter((x: string) => bodyIds.includes(x));
+      if (!itemIds.length)
+        return res.status(400).json({ error: "Nenhum item para concluir" });
+
+      const { data: items, error: itErr } = await supabaseAdmin
+        .from("orderitem")
+        .select("id, invoice_id, collection_id, status!status_id ( code )")
+        .in("id", itemIds)
+        .eq("company_id", req.company?.id);
+      if (itErr) throw itErr;
+
+      const setStatus = async (itemId: string, statusId: string) => {
+        const { error } = await supabaseAdmin
+          .from("orderitem")
+          .update({ status_id: statusId, updated_at: new Date() })
+          .eq("id", itemId)
+          .eq("company_id", req.company?.id);
+        if (error) {
+          if ((error as any).code === "P0001")
+            throw new Error((error as any).message);
+          throw error;
+        }
+      };
+
+      for (const it of items ?? []) {
+        let code = (it as any).status?.code;
+        if (code === 102) continue;
+        if (code === 100) {
+          await setStatus(it.id, s110);
+          code = 110;
+        }
+        if (code === 110) {
+          await setStatus(it.id, s111);
+          code = 111;
+        }
+        if (code === 111) {
+          await setStatus(it.id, (it as any).invoice_id ? s112 : s113);
+          code = 200;
+        }
+        await setStatus(it.id, s102); // 200 -> 102
+      }
+
+      const { data: refreshed } = await supabaseAdmin
+        .from("orders")
+        .select("id, tracking, finaled_at, status!status_id ( id, code, name )")
+        .eq("id", id)
+        .eq("company_id", req.company.id)
+        .single();
+      return res.status(200).json(refreshed);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export const ordersController = new OrdersController();
