@@ -32,5 +32,6 @@ router.post(
   uploadCanhoto.single("comprovante"),
   orderReceiptsController.uploadComprovante,
 );
+router.patch("/tracking-events/:event_id", trackingEventsController.update);
 
 export default router;
