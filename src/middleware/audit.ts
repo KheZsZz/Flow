@@ -12,6 +12,8 @@ const ENTITY_LABEL: Record<string, string> = {
   clients: "cliente",
   status: "status",
   fuel: "abastecimento",
+  expenses: "custo",
+  maintenance: "manutenção",
 };
 
 const SKIP = new Set([

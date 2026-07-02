@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-// Espelha a tabela audit_log (registros vêm prontos do banco)
 export const auditLogSchema = z.object({
   id: z.string().uuid(),
   corporation_id: z.string().uuid().nullish(),
@@ -15,16 +14,14 @@ export const auditLogSchema = z.object({
   created_at: z.string(),
 });
 
-// Filtros da aba de Auditoria (todos opcionais)
 export const auditFilterSchema = z.object({
   entity: z.string().optional(),
   actor_id: z.string().uuid().optional(),
   action: z.string().optional(),
-  from: z.string().optional(), // ISO date
-  to: z.string().optional(), // ISO date
+  from: z.string().optional(),
+  to: z.string().optional(),
 });
 
-// Rótulos legíveis das entidades auditadas
 export const AUDIT_ENTITY_LABELS: Record<string, string> = {
   users: "Usuários",
   drivers: "Motoristas",
@@ -36,6 +33,8 @@ export const AUDIT_ENTITY_LABELS: Record<string, string> = {
   status: "Status",
   fuel: "Abastecimento",
   goals: "Metas",
+  expenses: "custo",
+  maintenance: "manutenção",
 };
 
 export const AUDIT_ACTION_LABELS: Record<string, string> = {

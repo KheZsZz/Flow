@@ -17,8 +17,8 @@ const ROLE_HIERARCHY: Record<string, number> = {
   Admin: 5,
   Financer: 4,
   Requestor: 3,
-  Driver: 2,
-  Commum: 1,
+  Commum: 2,
+  Driver: 1,
 };
 
 class AuthMiddleware {

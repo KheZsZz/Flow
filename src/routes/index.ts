@@ -19,6 +19,8 @@ import goalsRoutes from "@/routes/goalsRoutes";
 import alertsRoutes from "@/routes/alertsRoutes";
 import auditRoutes from "@/routes/auditRoutes";
 import uploadRoutes from "@/routes/uploadRoutes";
+import expensesRoutes from "@/routes/expensesRoutes";
+import maintenanceRoutes from "@/routes/maintenanceRoutes";
 
 const router = express.Router();
 
@@ -127,6 +129,20 @@ router.use(
   authMiddleware.authUser,
   authMiddleware.reqCompany,
   uploadRoutes,
+);
+
+router.use(
+  "/expenses",
+  authMiddleware.authUser,
+  authMiddleware.reqCompany,
+  expensesRoutes,
+);
+
+router.use(
+  "/maintenance",
+  authMiddleware.authUser,
+  authMiddleware.reqCompany,
+  maintenanceRoutes,
 );
 
 export default router;

@@ -6,8 +6,12 @@ const router = Router();
 router.post("/", fuelController.create);
 router.put("/:id", fuelController.update);
 router.delete("/:id", fuelController.delete);
-router.get("/", fuelController.find);
 
-router.get("/plate/:plate", fuelController.findByPlate);
+router.get("/", authMiddleware.requireRole("Requestor"), fuelController.find);
+router.get(
+  "/plate/:plate",
+  authMiddleware.requireRole("Requestor"),
+  fuelController.findByPlate,
+);
 
 export default router;
