@@ -1,26 +1,26 @@
 import { Response, NextFunction } from "express";
 import { supabase } from "@/config/supabase";
 import { AuthRequest } from "@/middleware/auth";
-import { statusSchema } from "@/schemas/statusSchema";
+import { statusSchema, StatusUpdateSchema } from "@/schemas/statusSchema";
 
 class statusController {
   async create(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const statusData = statusSchema.parse({
-        ...req.body,
-        corporation_id: req.company?.id,
-        created_by: req.user?.id,
-      });
-
       if (!req.company?.id || !req.user?.id) {
         return res
           .status(400)
           .json({ error: "Missing company or user context in request" });
       }
 
+      const statusData = statusSchema.parse(req.body);
+
       const { data, error } = await supabase
         .from("status")
-        .insert({ ...statusData })
+        .insert({
+          ...statusData,
+          corporation_id: req.company.id,
+          created_by: req.user.id,
+        })
         .select()
         .single();
 
@@ -48,7 +48,7 @@ class statusController {
       let query = supabase
         .from("status")
         .select("id, code, name, description, is_active")
-        .eq("corporation_id", req.company?.id)
+        .eq("corporation_id", req.company.id)
         .order("code", { ascending: true });
 
       if (activeOnly) query = query.eq("is_active", true);
@@ -65,10 +65,6 @@ class statusController {
   async update(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const statusUpdate = statusSchema.parse({
-        ...req.body,
-        updated_at: new Date().toISOString(),
-      });
 
       if (!req.company?.id) {
         return res
@@ -76,11 +72,16 @@ class statusController {
           .json({ error: "Company context not found in request" });
       }
 
+      const statusUpdate = StatusUpdateSchema.parse(req.body);
+
       const { data, error } = await supabase
         .from("status")
-        .update({ ...statusUpdate })
+        .update({
+          ...statusUpdate,
+          updated_at: new Date().toISOString(),
+        })
         .eq("id", id)
-        .eq("corporation_id", req.company?.id)
+        .eq("corporation_id", req.company.id)
         .select()
         .single();
 
@@ -115,7 +116,7 @@ class statusController {
         .from("status")
         .update({ is_active, updated_at: new Date().toISOString() })
         .eq("id", id)
-        .eq("corporation_id", req.company?.id)
+        .eq("corporation_id", req.company.id)
         .select("id, code, name, description, is_active")
         .single();
 
@@ -144,7 +145,7 @@ class statusController {
         .from("status")
         .select()
         .eq("code", code)
-        .eq("corporation_id", req.company?.id)
+        .eq("corporation_id", req.company.id)
         .single();
 
       if (error) throw error;
@@ -169,7 +170,7 @@ class statusController {
         .from("status")
         .select()
         .eq("id", id)
-        .eq("corporation_id", req.company?.id)
+        .eq("corporation_id", req.company.id)
         .single();
 
       if (error) throw error;

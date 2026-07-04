@@ -26,9 +26,7 @@ export const orderSchema = z.object({
   notes: z.string().max(500).nullish(),
   vehicles: z.array(orderVehicleSchema).min(1, "Informe ao menos um veículo"),
   items: z.array(orderItemInputSchema).optional(),
-  scheduled_start: z.coerce.date({
-    error: "Informe a data/hora de início da viagem",
-  }),
+  scheduled_start: z.coerce.date().nullish(),
   finaled_at: z.coerce.date().nullish(),
 });
 
@@ -56,7 +54,6 @@ export const updateOrderSchema = z.object({
 });
 
 export type UpdateOrderType = z.infer<typeof updateOrderSchema>;
-
 export type CreateOrderType = z.infer<typeof orderSchema>;
 export type OrderVehicleType = z.infer<typeof orderVehicleSchema>;
 export type OrderItemInputType = z.infer<typeof orderItemInputSchema>;

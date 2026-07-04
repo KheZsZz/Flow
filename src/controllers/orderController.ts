@@ -41,7 +41,7 @@ class OrdersController {
       }
 
       const { id } = req.params;
-      const body = updateOrderSchema.parse(req.body);
+      const body = updateOrderStatusSchema.parse(req.body);
 
       const { data: order, error: findError } = await supabaseAdmin
         .from("orders")
